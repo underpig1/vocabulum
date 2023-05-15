@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <title>Vocabulum</title>
+    <style>
+        :root {
+            --bg-grid-color: #00000017;
+            --tile-size: 40px;
+            --bg-pos-x: 0px;
+            --bg-pos-y: 0px;
+            --tile-color: #f9be74ff;
+        }
+
+        body {
+            background-size: var(--tile-size) var(--tile-size);
+            background-image: linear-gradient(to right, var(--bg-grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--bg-grid-color) 1px, transparent 1px);
+            background-position: calc(50vw - var(--bg-pos-x)) calc(50vh - var(--bg-pos-y));
+            user-select: none;
+        }
+
+        .tile {
+            position: absolute;
+            width: var(--tile-size);
+            height: var(--tile-size);
+            background-color: var(--tile-color);
+            border-radius: calc(var(--tile-size)/5);
+            text-align: center;
+            line-height: calc(var(--tile-size) + var(--tile-size)/12);
+            font-size: calc(var(--tile-size)/1.7);
+            font-family: 'Comfortaa', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            /* transition: transform 0.2s, top 0.1s, left 0.1s; */
+        }
+
+        .tile:active {
+            /* transform: scale(0.85); */
+        }
+
+        .tile>.value {
+            position: absolute;
+            left: calc(var(--tile-size)/7);
+            top: calc(var(--tile-size)/7);
+            line-height: calc(var(--tile-size)/4);
+            font-size: calc(var(--tile-size)/4);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script>
+        var target;
+        var target_initial_position;
+        var contested_tile_position;
+        var tile_is_contested;
+        var exiled_tile;
+        var dragbg = false;
+        var body_style, tile_size, grid_pos, grid_offset;
+        var tiles = {};
+        var tid = 0;
+        var dict = [];
+        updateScreen();
+
+        const alphamap = {
+            " ": { draws: 2, value: 0 },
+            "A": { draws: 9, value: 1 },
+            "B": { draws: 2, value: 3 },
+            "C": { draws: 2, value: 3 },
+            "D": { draws: 4, value: 2 },
+            "E": { draws: 12, value: 1 },
+            "F": { draws: 2, value: 4 },
+            "G": { draws: 3, value: 2 },
+            "H": { draws: 2, value: 4 },
+            "I": { draws: 9, value: 1 },
+            "J": { draws: 1, value: 8 },
+            "K": { draws: 1, value: 5 },
+            "L": { draws: 4, value: 1 },
+            "M": { draws: 2, value: 3 },
+            "N": { draws: 6, value: 1 },
+            "O": { draws: 8, value: 1 },
+            "P": { draws: 2, value: 3 },
+            "Q": { draws: 1, value: 10 },
+            "R": { draws: 6, value: 1 },
+            "S": { draws: 4, value: 1 },
+            "T": { draws: 6, value: 1 },
+            "U": { draws: 4, value: 1 },
+            "V": { draws: 2, value: 4 },
+            "W": { draws: 2, value: 4 },
+            "X": { draws: 1, value: 8 },
+            "Y": { draws: 2, value: 4 },
+            "Z": { draws: 1, value: 10 },
+        }
+        const alphaweightmap = [];
+        Object.keys(alphamap).forEach(c => alphaweightmap.push(...new Array(alphamap[c].draws).fill(c)));
+
+        fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split("\r\n"));
+
+        document.onmousedown = (e) => {
+            if (e.button == 0 && e.target.classList) {
+                if (e.target.classList.contains("tile")) {
+                    target = e.target;
+                    target_initial_position = tiles[target.getAttribute("tid")].position;
+                }
+                else dragbg = true;
+            }
+        }
+        document.onmouseup = (e) => {
+            target = null;
+            dragbg = false;
+
+            contested_tile_position = [null, null];
+            tile_is_contested = false;
+        }
+        document.onmousemove = (e) => {
+            if (target) {
+                var tid = target.getAttribute("tid");
+                var mouse_pos = [e.pageX - (grid_pos[0] % tile_size), e.pageY - (grid_pos[1] % tile_size)];
+                var snap_pos = snapToGrid(mouse_pos);
+
+                if (tile_is_contested) {
+                    if (snap_pos[0] != contested_tile_position[0] || snap_pos[1] != contested_tile_position[1]) {
+                        exiled_tile.position = contested_tile_position;
+                        tileTwerp(exiled_tile.element(), contested_tile_position);
+                        contested_tile_position = [null, null];
+                        tile_is_contested = false;
+                    }
+                }
+
+                for (const ttid of Object.keys(tiles)) {
+                    if (tiles[ttid].position[0] == snap_pos[0] && tiles[ttid].position[1] == snap_pos[1] && tid != ttid) {
+                        exiled_tile = tiles[ttid];
+                        contested_tile_position = snap_pos;
+                        exiled_tile.position = target_initial_position;
+                        tileTwerp(exiled_tile.element(), target_initial_position);
+                        tile_is_contested = true;
+                        break;
+                    };
+                }
+
+                // target.style.top = snap_pos[1] + "px";
+                // target.style.left = snap_pos[0] + "px";
+                
+                tiles[tid].position = snap_pos;
+                tileTwerp(target, snap_pos);
+            }
+        }
+
+        function selectTileByTID(tid) {
+            return document.body.querySelector(`div[tid="${tid}"]`);
+        }
+
+        function tileTwerp(target, position, duration = 0.2) {
+            gsap.to(target, {
+                duration: duration,
+                x: position[0] + "px",
+                y: position[1] + "px",
+                overwrite: "auto"
+            });
+        }
+
+        function snapToGrid(position) {
+            return position.map((c, i) => c - (c % tile_size) + (grid_pos[i] % tile_size));
+        }
+
+        function createTile(letter, value, position) {
+            const stid = JSON.parse(JSON.stringify(tid));
+            tid++;
+            document.body.innerHTML += `<div class="tile" tid="${stid}" letter="${letter}">${letter}<span class="value">${value}</span></div>`;
+            tiles[stid] = { position: JSON.parse(JSON.stringify(position)), element: () => selectTileByTID(stid), tid: stid, letter };
+            tileTwerp(tiles[stid].element(), position, 0);
+        }
+
+        function pickRandomTile() {
+            return alphaweightmap[Math.round(Math.random() * (alphaweightmap.length - 1))];
+        }
+
+        function createTileRow(size) {
+            var pos = [grid_pos[0] - Math.round(size/2)*tile_size, grid_pos[1]];
+            if (Object.keys(tiles).length > 0) {
+                var vertex_tile = Math.max.apply(null, Object.keys(tiles).map((tile) => tiles[tile].position[1]));
+                pos[1] = vertex_tile + tile_size*2;
+            }
+            for (var i = 0; i < size; i++) {
+                var random_tile = pickRandomTile();
+                createTile(random_tile, alphamap[random_tile].value, pos);
+                pos[0] += tile_size;
+            }
+        }
+
+        function getAllWords(tiles) {
+            var axes = [{}, {}];
+            for (var [i, tile] of Object.entries(tiles)) {
+                for (var j = 0; j < 2; j++) {
+                    if (!axes[j].hasOwnProperty(tile.position[j])) axes[j][tile.position[j]] = [];
+                    axes[j][tile.position[j]].push(tile);
+                }
+            }
+
+            var tile_groups = [];
+            for (var j = 0; j < 2; j++) {
+                for (var [k, tiles] of Object.entries(axes[j])) {
+                    var consecutive = [];
+                    var prev = null;
+                    var tiles = tiles.sort((a, b) => a.position[1 - j] - b.position[1 - j]);
+                    for (var tile of tiles) {
+                        var axis = tile.position[1 - j]/tile_size;
+                        if (Math.abs(axis - prev) == 1 || prev == null) consecutive.push(tile);
+                        else {
+                            if (consecutive.length > 1) tile_groups.push(consecutive);
+                            consecutive = [tile];
+                            prev = null;
+                        }
+                        prev = axis;
+                    }
+                    if (consecutive.length > 1) tile_groups.push(consecutive);
+                }
+            }
+
+            var words = [];
+            for (var group of tile_groups) words.push({ word: group.map((c) => c.letter).join(""), tiles: group });
+            return words;
+        }
+
+        function findWildWords(word) {
+            // var valid_possible = [];
+
+            // var word = word.split("");
+            // var wild_indices = word.map((c, i) => c == " " ? i : null).filter((c) => c != null);
+
+            // var possible_words = [];
+            // var possible_word = word.map((c) => c = (c == " " ? "A" : c));
+
+            // var forNest = (level, depth, callback, callid = 0) => {
+            //     var callid = callid;
+            //     if (level <= depth) {
+            //         for (var j = 1; j <= 26; j++) {
+            //             possible_word[wild_indices[level]] = Object.keys(alphamap)[j];
+            //             possible_words.push(JSON.parse(JSON.stringify(possible_word)));
+            //             if (possible_words.length == 26**(depth + 1)) callback();
+            //             else forNest(level + 1, depth, callback, callid++);
+            //         }
+            //     }
+            // }
+
+            // forNest(0, wild_indices.length - 1, () => {
+            //     var possible_string_words = possible_words.map((c) => c.join(""));
+            //     console.log(possible_words.length);
+            //     for (var possible_string_word of possible_string_words) {
+            //         if (dict.includes(possible_string_word)) valid_possible.push(possible_string_word);
+            //     }
+            // });
+            
+            var possible_words = [];
+            for (var dict_word of dict) {
+                if (dict_word.length == word.length) {
+                    var break_flag = false;
+                    for (var i = 0; i < dict_word.length; i++) {
+                        if (word[i] != " " && word[i] != dict_word[i]) {
+                            break_flag = true;
+                            break;
+                        }
+                    }
+                    if (!break_flag) possible_words.push(dict_word);
+                }
+            }
+            return possible_words;
+        }
+
+        function checkValidWords(words) {
+            for (var group of words) group.valid = dict.includes(group.word);
+            
+            var wild_tiles = {};
+            for (var group of words) {
+                if (group.word.includes(" ")) {
+                    for (var tile of group.tiles) {
+                        if (tile.letter == " ") {
+                            if (wild_tiles.hasOwnProperty(tile.tid)) wild_tiles[tile.tid].push(group.word);
+                            else wild_tiles[tile.tid] = [group.word];
+                        }
+                    }
+                }
+            }
+
+            for (var tile of Object.keys(wild_tiles)) {
+                var possible_combos = [];
+                for (var tile of wild_tiles[tile]) {
+                    wild_tiles[tile]
+                }
+            }
+            console.log(wild_tiles);
+        }
+
+        function getScore(tiles) {
+            var words = getAllWords(tiles);
+            var score = 0;
+
+            var word_ids = words.flatMap((c) => c.tiles.map((d) => d.tid));
+            var all_ids = Object.keys(tiles).map((c) => tiles[c].tid);
+            var single_ids = all_ids.filter((c) => !word_ids.includes(c));
+            var singles = single_ids.map((c) => tiles[c]);
+            var word_map = checkValidWords(words);
+            console.log(word_map);
+
+            for (var group of word_map) score += (group.valid ? 1 : -1)*group.word.split("").reduce((psum, c) => psum + alphamap[c.word].value, 0);
+            return score;
+        }
+
+        createTileRow(7);
+        createTileRow(2);
+        console.log(getScore(tiles));
+
+        function updateScreen() {
+            body_style = getComputedStyle(document.body);
+            tile_size = parseInt(body_style.getPropertyValue("--tile-size"));
+            grid_pos = body_style.getPropertyValue("background-position").split(" ").map((c) => parseInt(c)).filter((c, i) => i < 2);
+            grid_offset = [body_style.getPropertyValue("--bg-pos-x"), body_style.getPropertyValue("--bg-pos-y")].map((c) => parseInt(c));
+        };
+    </script>
+</body>
+
+</html>
