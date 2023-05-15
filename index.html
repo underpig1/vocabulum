@@ -233,34 +233,6 @@
         }
 
         function findWildWords(word) {
-            // var valid_possible = [];
-
-            // var word = word.split("");
-            // var wild_indices = word.map((c, i) => c == " " ? i : null).filter((c) => c != null);
-
-            // var possible_words = [];
-            // var possible_word = word.map((c) => c = (c == " " ? "A" : c));
-
-            // var forNest = (level, depth, callback, callid = 0) => {
-            //     var callid = callid;
-            //     if (level <= depth) {
-            //         for (var j = 1; j <= 26; j++) {
-            //             possible_word[wild_indices[level]] = Object.keys(alphamap)[j];
-            //             possible_words.push(JSON.parse(JSON.stringify(possible_word)));
-            //             if (possible_words.length == 26**(depth + 1)) callback();
-            //             else forNest(level + 1, depth, callback, callid++);
-            //         }
-            //     }
-            // }
-
-            // forNest(0, wild_indices.length - 1, () => {
-            //     var possible_string_words = possible_words.map((c) => c.join(""));
-            //     console.log(possible_words.length);
-            //     for (var possible_string_word of possible_string_words) {
-            //         if (dict.includes(possible_string_word)) valid_possible.push(possible_string_word);
-            //     }
-            // });
-            
             var possible_words = [];
             for (var dict_word of dict) {
                 if (dict_word.length == word.length) {
@@ -278,27 +250,47 @@
         }
 
         function checkValidWords(words) {
-            for (var group of words) group.valid = dict.includes(group.word);
+            var word_map = words;
+            for (var group of word_map) group.valid = dict.includes(group.word);
             
             var wild_tiles = {};
-            for (var group of words) {
+            for (var group of word_map) {
                 if (group.word.includes(" ")) {
                     for (var tile of group.tiles) {
                         if (tile.letter == " ") {
-                            if (wild_tiles.hasOwnProperty(tile.tid)) wild_tiles[tile.tid].push(group.word);
-                            else wild_tiles[tile.tid] = [group.word];
+                            if (wild_tiles.hasOwnProperty(tile.tid)) wild_tiles[tile.tid].push(group);
+                            else wild_tiles[tile.tid] = [group];
                         }
                     }
                 }
             }
+            for (var tid of Object.keys(wild_tiles)) {
+                var word_options = [];
 
-            for (var tile of Object.keys(wild_tiles)) {
-                var possible_combos = [];
-                for (var tile of wild_tiles[tile]) {
-                    wild_tiles[tile]
+                for (var group of wild_tiles[tid]) {
+                    var possibilities = findWildWords(group.word);
+                    if (possibilities.length > 0) {
+                        var wild_indices = group.word.split("").map((c, i) => i).filter((c) => group.word[c] == " ");
+                        var this_wild_index = group.tiles.map((c, i) => c = { i, tid: c.tid }).filter((c) => c.tid == tid)[0].i;
+                        word_options.push({ possibilities, index: this_wild_index });
+                    }
+                }
+
+                var possible_substitutions = [];
+                for (var option of word_options) {
+                    var possible_substitution = option.possibilities.map((c) => c[option.index]);
+                    possible_substitutions.push(possible_substitution);
+                }
+
+                var valid = possible_substitutions.slice(1).every(array => array.some(el => possible_substitutions[0].includes(el)));
+                if (valid) {
+                    for (var group of word_map) {
+                        if (group.tiles.filter((c) => c.tid == tid).length > 0) group.valid = true;
+                    }
                 }
             }
-            console.log(wild_tiles);
+            
+            return word_map;
         }
 
         function getScore(tiles) {
@@ -310,7 +302,6 @@
             var single_ids = all_ids.filter((c) => !word_ids.includes(c));
             var singles = single_ids.map((c) => tiles[c]);
             var word_map = checkValidWords(words);
-            console.log(word_map);
 
             for (var group of word_map) score += (group.valid ? 1 : -1)*group.word.split("").reduce((psum, c) => psum + alphamap[c.word].value, 0);
             return score;
@@ -318,7 +309,7 @@
 
         createTileRow(7);
         createTileRow(2);
-        console.log(getScore(tiles));
+        getScore(tiles);
 
         function updateScreen() {
             body_style = getComputedStyle(document.body);
