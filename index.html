@@ -209,13 +209,13 @@
 
             var tile_groups = [];
             for (var j = 0; j < 2; j++) {
-                for (var [k, tiles] of Object.entries(axes[j])) {
+                for (var [k, unsorted] of Object.entries(axes[j])) {
                     var consecutive = [];
                     var prev = null;
-                    var tiles = tiles.sort((a, b) => a.position[1 - j] - b.position[1 - j]);
-                    for (var tile of tiles) {
+                    var sorted = unsorted.sort((a, b) => a.position[1 - j] - b.position[1 - j]);
+                    for (var tile of sorted) {
                         var axis = tile.position[1 - j]/tile_size;
-                        if (Math.abs(axis - prev) == 1 || prev == null) consecutive.push(tile);
+                        if (Math.abs(axis - prev) <= 1 || prev == null) consecutive.push(tile);
                         else {
                             if (consecutive.length > 1) tile_groups.push(consecutive);
                             consecutive = [tile];
@@ -266,6 +266,7 @@
             }
             for (var tid of Object.keys(wild_tiles)) {
                 var word_options = [];
+                var stop_flag = false;
 
                 for (var group of wild_tiles[tid]) {
                     var possibilities = findWildWords(group.word);
@@ -274,18 +275,26 @@
                         var this_wild_index = group.tiles.map((c, i) => c = { i, tid: c.tid }).filter((c) => c.tid == tid)[0].i;
                         word_options.push({ possibilities, index: this_wild_index });
                     }
+                    else {
+                        for (var group of word_map) {
+                            if (group.tiles.filter((c) => c.tid == tid).length > 0) group.valid = false;
+                        }
+                        stop_flag = true;
+                    }
                 }
 
-                var possible_substitutions = [];
-                for (var option of word_options) {
-                    var possible_substitution = option.possibilities.map((c) => c[option.index]);
-                    possible_substitutions.push(possible_substitution);
-                }
+                if (!stop_flag) {
+                    var possible_substitutions = [];
+                    for (var option of word_options) {
+                        var possible_substitution = option.possibilities.map((c) => c[option.index]);
+                        possible_substitutions.push(possible_substitution);
+                    }
 
-                var valid = possible_substitutions.slice(1).every(array => array.some(el => possible_substitutions[0].includes(el)));
-                if (valid) {
-                    for (var group of word_map) {
-                        if (group.tiles.filter((c) => c.tid == tid).length > 0) group.valid = true;
+                    var valid = possible_substitutions.slice(1).every(array => array.some(el => possible_substitutions[0].includes(el)));
+                    if (valid) {
+                        for (var group of word_map) {
+                            if (group.tiles.filter((c) => c.tid == tid).length > 0) group.valid = true;
+                        }
                     }
                 }
             }
@@ -303,10 +312,12 @@
 
         function getScore(tiles) {
             var words = getAllWords(tiles);
-            var score = 0;
-            var word_map = checkValidWords(words);
+            words = checkValidWords(words);
+            words = calculateConnectionPenalties(words);
+            console.log(words);
 
-            for (var group of word_map) score += (group.valid ? 1 : -1)*group.word.split("").reduce((psum, c) => psum + alphamap[c.word].value, 0);
+            var score = 0;
+            for (var group of words) score += (group.valid ? 1 : -1)*group.word.split("").reduce((psum, c) => psum + alphamap[c].value, 0);
             return score;
         }
 
@@ -359,14 +370,19 @@
             return groups;
         }
 
-        function executeConnectionPenalties(tiles) {
+        function calculateConnectionPenalties(words) {
+            var word_map = words;
             var groups = getConsecutiveTileGroups(tiles);
-            var other_groups = groups.filter((_, i, arr) => i != arr.indexOf(arr.reduce((a, b) => b.length > a.length ? b : a)));
-            var penalties = 0;
-
-            for (var group of other_groups) {
-                for (var )
+            var penalized_groups = groups.filter((_, i, arr) => i != arr.indexOf(arr.reduce((a, b) => b.length > a.length ? b : a)));
+            var penalized_tile_tids = penalized_groups.flat().map((c) => c.tid);
+            var singles = penalized_groups.filter((c) => c.length == 1);
+            for (var group of word_map) {
+                for (var tile of group.tiles) {
+                    if (penalized_tile_tids.includes(tile.tid)) group.valid = false;
+                }
             }
+            for (var tile of singles) word_map.push({ word: tile[0].letter, tiles: [tile[0]], valid: false });
+            return words;
         }
 
         createTileRow(7);
