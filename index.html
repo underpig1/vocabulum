@@ -19,10 +19,18 @@
         }
 
         body {
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .background {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
             background-size: var(--tile-size) var(--tile-size);
             background-image: linear-gradient(to right, var(--bg-grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--bg-grid-color) 1px, transparent 1px);
             background-position: calc(50vw - var(--bg-pos-x)) calc(50vh - var(--bg-pos-y));
-            user-select: none;
         }
 
         .tile {
@@ -54,10 +62,20 @@
             font-size: calc(var(--tile-size)/4);
             pointer-events: none;
         }
+
+        .tiles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
     </style>
 </head>
 
 <body>
+    <div class="background"></div>
+    <div class="tiles"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
         var target;
@@ -176,7 +194,7 @@
         function createTile(letter, value, position) {
             const stid = JSON.parse(JSON.stringify(tid));
             tid++;
-            document.body.innerHTML += `<div class="tile" tid="${stid}" letter="${letter}">${letter}<span class="value">${value}</span></div>`;
+            document.querySelector(".tiles").innerHTML += `<div class="tile" tid="${stid}" letter="${letter}">${letter}<span class="value">${value}</span></div>`;
             tiles[stid] = { position: JSON.parse(JSON.stringify(position)), element: () => selectTileByTID(stid), tid: stid, letter };
             tileTwerp(tiles[stid].element(), position, 0);
         }
@@ -390,11 +408,11 @@
         getScore(tiles);
 
         function updateScreen() {
-            body_style = getComputedStyle(document.body);
+            body_style = getComputedStyle(document.querySelector(".background"));
             tile_size = parseInt(body_style.getPropertyValue("--tile-size"));
             grid_pos = body_style.getPropertyValue("background-position").split(" ").map((c) => parseInt(c)).filter((c, i) => i < 2);
             grid_offset = [body_style.getPropertyValue("--bg-pos-x"), body_style.getPropertyValue("--bg-pos-y")].map((c) => parseInt(c));
-        };
+        }
     </script>
 </body>
 
