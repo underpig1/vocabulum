@@ -293,18 +293,80 @@
             return word_map;
         }
 
-        function getScore(tiles) {
-            var words = getAllWords(tiles);
-            var score = 0;
-
+        function getSingles(words) {
             var word_ids = words.flatMap((c) => c.tiles.map((d) => d.tid));
             var all_ids = Object.keys(tiles).map((c) => tiles[c].tid);
             var single_ids = all_ids.filter((c) => !word_ids.includes(c));
             var singles = single_ids.map((c) => tiles[c]);
+            return singles;
+        }
+
+        function getScore(tiles) {
+            var words = getAllWords(tiles);
+            var score = 0;
             var word_map = checkValidWords(words);
 
             for (var group of word_map) score += (group.valid ? 1 : -1)*group.word.split("").reduce((psum, c) => psum + alphamap[c.word].value, 0);
             return score;
+        }
+
+        function calculateScore(word) {
+            var score = 0;
+            for (var letter of word) score += alphamap[letter].value;
+            return score;
+        }
+
+        function getConsecutiveTileGroups(tiles) {
+            var visited = new Set();
+            var groups = [];
+
+            function getAdjacents(tile) {
+                var adjacents = [];
+                for (var stile of Object.values(tiles)) {
+                    if (stile.tid != tile.tid) {
+                        var x_diff = Math.abs(stile.position[0] - tile.position[0]);
+                        var y_diff = Math.abs(stile.position[1] - tile.position[1]);
+                        if ((x_diff <= tile_size && y_diff <= tile_size) && (x_diff == 0 || y_diff == 0) && !(x_diff == 0 && y_diff == 0)) {
+                            adjacents.push(stile);
+                        }
+                    }
+                }
+                return adjacents;
+            }
+
+            function firstSearch(tile, group) {
+                visited.add(tile.tid);
+                group.push(tile);
+                var adjacents = getAdjacents(tile);
+                if (adjacents.length > 0) {
+                    for (var adjacent of adjacents) {
+                        if (!visited.has(adjacent.tid)) {
+                            firstSearch(adjacent, group);
+                        }
+                    }
+                }
+                else groups.push([tile]);
+            }
+
+            for (var tile of Object.values(tiles)) {
+                if (!visited.has(tile.id)) {
+                    var group = [];
+                    firstSearch(tile, group);
+                    if (group.length > 1) groups.push(group);
+                }
+            }
+
+            return groups;
+        }
+
+        function executeConnectionPenalties(tiles) {
+            var groups = getConsecutiveTileGroups(tiles);
+            var other_groups = groups.filter((_, i, arr) => i != arr.indexOf(arr.reduce((a, b) => b.length > a.length ? b : a)));
+            var penalties = 0;
+
+            for (var group of other_groups) {
+                for (var )
+            }
         }
 
         createTileRow(7);
