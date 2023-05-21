@@ -13,8 +13,6 @@
         :root {
             --bg-grid-color: #00000017;
             --tile-size: 40px;
-            --bg-pos-x: 0px;
-            --bg-pos-y: 0px;
             --tile-color: #f9be74ff;
         }
 
@@ -24,13 +22,13 @@
             overflow: hidden;
         }
 
-        .background {
+        #background {
             width: 100vw;
             height: 100vh;
             margin: 0;
             background-size: var(--tile-size) var(--tile-size);
             background-image: linear-gradient(to right, var(--bg-grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--bg-grid-color) 1px, transparent 1px);
-            background-position: calc(50vw - var(--bg-pos-x)) calc(50vh - var(--bg-pos-y));
+            background-position: 0 0;
         }
 
         .tile {
@@ -63,7 +61,7 @@
             pointer-events: none;
         }
 
-        .tiles {
+        #tiles {
             position: absolute;
             top: 0;
             left: 0;
@@ -74,21 +72,26 @@
 </head>
 
 <body>
-    <div class="background"></div>
-    <div class="tiles"></div>
+    <div id="background"></div>
+    <div id="tiles"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
-        var target;
-        var target_initial_position;
-        var contested_tile_position;
-        var tile_is_contested;
-        var exiled_tile;
-        var dragbg = false;
-        var body_style, tile_size, grid_pos, grid_offset;
+        var target, target_initial_position, contested_tile_position, tile_is_contested, exiled_tile;
+
+        var grid_pos = [0, 0];
+        var tile_size = 40;
+        var panning = false;
+        var mouse_initial_position = [0, 0];
+        var grid_initial_position = [0, 0];
+
         var tiles = {};
         var tid = 0;
         var dict = [];
-        updateScreen();
+
+        const grid = document.getElementById("background");
+        const tile_container = document.getElementById("tiles");
+
+        var anchor_pos = snapToGrid([window.innerWidth/2, window.innerHeight/2], false);
 
         const alphamap = {
             " ": { draws: 2, value: 0 },
@@ -130,12 +133,16 @@
                     target = e.target;
                     target_initial_position = tiles[target.getAttribute("tid")].position;
                 }
-                else dragbg = true;
+                else {
+                    panning = true;
+                    mouse_initial_position = [e.pageX, e.pageY];
+                    grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
+                }
             }
         }
         document.onmouseup = (e) => {
             target = null;
-            dragbg = false;
+            panning = false;
 
             contested_tile_position = [null, null];
             tile_is_contested = false;
@@ -143,24 +150,24 @@
         document.onmousemove = (e) => {
             if (target) {
                 var tid = target.getAttribute("tid");
-                var mouse_pos = [e.pageX - (grid_pos[0] % tile_size), e.pageY - (grid_pos[1] % tile_size)];
+                var mouse_pos = [e.pageX, e.pageY];
                 var snap_pos = snapToGrid(mouse_pos);
 
                 if (tile_is_contested) {
                     if (snap_pos[0] != contested_tile_position[0] || snap_pos[1] != contested_tile_position[1]) {
                         exiled_tile.position = contested_tile_position;
-                        tileTwerp(exiled_tile.element(), contested_tile_position);
+                        tileTwerp(exiled_tile.element, contested_tile_position);
                         contested_tile_position = [null, null];
                         tile_is_contested = false;
                     }
                 }
 
-                for (const ttid of Object.keys(tiles)) {
-                    if (tiles[ttid].position[0] == snap_pos[0] && tiles[ttid].position[1] == snap_pos[1] && tid != ttid) {
-                        exiled_tile = tiles[ttid];
+                for (const stid of Object.keys(tiles)) {
+                    if (tiles[stid].position[0] == snap_pos[0] && tiles[stid].position[1] == snap_pos[1] && tid != stid) {
+                        exiled_tile = tiles[stid];
                         contested_tile_position = snap_pos;
                         exiled_tile.position = target_initial_position;
-                        tileTwerp(exiled_tile.element(), target_initial_position);
+                        tileTwerp(exiled_tile.element, target_initial_position);
                         tile_is_contested = true;
                         break;
                     };
@@ -171,6 +178,10 @@
                 
                 tiles[tid].position = snap_pos;
                 tileTwerp(target, snap_pos);
+            }
+            else if (panning) {
+                var mouse_pos = [e.pageX, e.pageY];
+                setGridPos(grid_initial_position.map((c, i) => c + mouse_pos[i] - mouse_initial_position[i]));
             }
         }
 
@@ -187,16 +198,53 @@
             });
         }
 
-        function snapToGrid(position) {
-            return position.map((c, i) => c - (c % tile_size) + (grid_pos[i] % tile_size));
+        function tileAppear(target) {
+            gsap.to(target, {
+                duration: 0.2,
+                scale: 1,
+                overwrite: "auto"
+            });
         }
 
-        function createTile(letter, value, position) {
+        function setGridPos(position, duration = 0.2, ease = "power4.out") {
+            gsap.to(grid, {
+                duration,
+                backgroundPosition: `${position[0]}px ${position[1]}px`,
+                ease,
+                overwrite: "auto"
+            });
+            gsap.to(tile_container, {
+                duration,
+                x: position[0] + "px",
+                y: position[1] + "px",
+                ease,
+                overwrite: "auto"
+            });
+            grid_pos = position;
+        }
+
+        function snapToGrid(position, tile_relative = true) {
+            return position.map((c, i) => (tile_relative ? 0 : grid_pos[i]) + Math.floor((c - grid_pos[i])/tile_size)*tile_size);
+        }
+
+        function createTile(letter, value, position, delay = 0) {
             const stid = JSON.parse(JSON.stringify(tid));
             tid++;
-            document.querySelector(".tiles").innerHTML += `<div class="tile" tid="${stid}" letter="${letter}">${letter}<span class="value">${value}</span></div>`;
-            tiles[stid] = { position: JSON.parse(JSON.stringify(position)), element: () => selectTileByTID(stid), tid: stid, letter };
-            tileTwerp(tiles[stid].element(), position, 0);
+            var tile_element = document.createElement("div");
+            tile_element.classList.add("tile");
+            tile_element.setAttribute("tid", stid);
+            tile_element.setAttribute("letter", letter);
+            tile_element.innerHTML = letter;
+            var value_element = document.createElement("span");
+            value_element.classList.add("value");
+            value_element.innerHTML = value;
+            tile_element.appendChild(value_element);
+            tile_container.appendChild(tile_element);
+            tiles[stid] = { position, element: tile_element, tid: stid, letter };
+            tileTwerp(tile_element, position, 0);
+            gsap.set(tile_element, { scale: 0 });
+            setTimeout(() => tileAppear(tile_element), delay);
+            return stid;
         }
 
         function pickRandomTile() {
@@ -204,16 +252,17 @@
         }
 
         function createTileRow(size) {
-            var pos = [grid_pos[0] - Math.round(size/2)*tile_size, grid_pos[1]];
+            var pos = [anchor_pos[0] - Math.round(size/2)*tile_size, anchor_pos[1]];
             if (Object.keys(tiles).length > 0) {
                 var vertex_tile = Math.max.apply(null, Object.keys(tiles).map((tile) => tiles[tile].position[1]));
                 pos[1] = vertex_tile + tile_size*2;
             }
             for (var i = 0; i < size; i++) {
                 var random_tile = pickRandomTile();
-                createTile(random_tile, alphamap[random_tile].value, pos);
+                createTile(random_tile, alphamap[random_tile].value, JSON.parse(JSON.stringify(pos)), i*100);
                 pos[0] += tile_size;
             }
+            setGridPos([0, -pos[1] + anchor_pos[1]], 0.5, "power4.out");
         }
 
         function getAllWords(tiles) {
@@ -269,7 +318,9 @@
 
         function checkValidWords(words) {
             var word_map = words;
-            for (var group of word_map) group.valid = dict.includes(group.word);
+            for (var group of word_map) {
+                if (!group.word.includes(" ")) group.valid = dict.includes(group.word);
+            }
             
             var wild_tiles = {};
             for (var group of word_map) {
@@ -311,7 +362,12 @@
                     var valid = possible_substitutions.slice(1).every(array => array.some(el => possible_substitutions[0].includes(el)));
                     if (valid) {
                         for (var group of word_map) {
-                            if (group.tiles.filter((c) => c.tid == tid).length > 0) group.valid = true;
+                            if (group.tiles.filter((c) => c.tid == tid).length > 0 && !group.hasOwnProperty("valid")) group.valid = true;
+                        }
+                    }
+                    else {
+                        for (var group of word_map) {
+                            if (group.tiles.filter((c) => c.tid == tid).length > 0) group.valid = false;
                         }
                     }
                 }
@@ -335,7 +391,7 @@
             console.log(words);
 
             var score = 0;
-            for (var group of words) score += (group.valid ? 1 : -1)*group.word.split("").reduce((psum, c) => psum + alphamap[c].value, 0);
+            for (var group of words) score += (group.valid ? 1 : 0)*group.word.split("").reduce((psum, c) => psum + alphamap[c].value, 0);
             return score;
         }
 
@@ -404,15 +460,8 @@
         }
 
         createTileRow(7);
-        createTileRow(2);
+        //createTileRow(2);
         getScore(tiles);
-
-        function updateScreen() {
-            body_style = getComputedStyle(document.querySelector(".background"));
-            tile_size = parseInt(body_style.getPropertyValue("--tile-size"));
-            grid_pos = body_style.getPropertyValue("background-position").split(" ").map((c) => parseInt(c)).filter((c, i) => i < 2);
-            grid_offset = [body_style.getPropertyValue("--bg-pos-x"), body_style.getPropertyValue("--bg-pos-y")].map((c) => parseInt(c));
-        }
     </script>
 </body>
 
