@@ -4,16 +4,38 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700;1000&display=swap" rel="stylesheet">
     <title>Vocabulum</title>
     <style>
         :root {
             --bg-grid-color: #00000017;
-            --tile-size: 40px;
+            --tile-size: 45px;
             --tile-color: #f9be74ff;
+            --font-color: #333;
+
+            --light-red: #ff9080ff;
+            --light-yellow: #f0df70ff;
+            --light-green: #80df70ff;
+        }
+
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            touch-action: manipulation;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -45,6 +67,7 @@
             cursor: pointer;
             top: 0;
             left: 0;
+            transition: border-radius 0.2s;
             /* transition: transform 0.2s, top 0.1s, left 0.1s; */
         }
 
@@ -68,30 +91,143 @@
             width: 100vw;
             height: 100vh;
         }
+
+        .ui {
+            position: absolute;
+            font-size: 16px;
+            line-height: 16px;
+            font-size: calc(var(--tile-size)/1.5);
+            font-family: 'Comfortaa', sans-serif;
+            color: var(--font-color);
+            font-weight: bold;
+            margin: 0;
+            pointer-events: none;
+            bottom: 35px;
+        }
+
+        .timer {
+            right: 35px;
+        }
+
+        .score {
+            left: 35px;
+        }
+
+        .tile[tid="-1"] {
+            pointer-events: none;
+        }
+
+        .take-2 {
+            display: flex;
+            width: 100%;
+            height: 60px;
+            margin-bottom: -15px;
+            justify-content: center;
+        }
+
+        .take-2 > div {
+            display: flex;
+            width: 85px;
+            height: 100%;
+            background-color: var(--light-green);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            pointer-events: all;
+            transition: transform 0.1s;
+            transform: scale(0.9);
+        }
+
+        .take-2 svg {
+            fill: white;
+            width: 50%;
+        }
+
+        .take-2:active div {
+            transform: scale(0.85);
+        }
+
+        .button {
+            width: 90%;
+            height: 66px;
+            background-color: var(--light-red);
+            border-radius: 15px;
+            border: solid 5px #333;
+            box-shadow: 0px 5px 0px 0px #333;
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 28px;
+            text-align: center;
+            line-height: 57px;
+            font-weight: 1000;
+            color: #333;
+            transform: translateY(-5px);
+        }
+
+        .buttons {
+            z-index: 2;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 230px;
+            margin-top: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: column;
+        }
+
+        .buttons > .button:active {
+            transform: translateY(0);
+            box-shadow: 0px 0px 0px 0px #333;
+        }
     </style>
 </head>
 
 <body>
     <div id="background"></div>
     <div id="tiles"></div>
+    <h1 class="ui timer"><span id="time-min">0</span>:<span id="time-sec">00</span></h1>
+    <h1 class="ui score">0</h1>
+    <div class="buttons">
+        <div class="button">rush</div>
+        <div class="button" style="background-color: var(--light-yellow)">tutorial</div>
+        <div class="button" style="background-color: var(--light-green)">versus</div>
+    </div>
+    <div class="ui take-2" onclick="take2()">
+        <div class="button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                    d="M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z">
+                </path>
+            </svg>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
         var target, target_initial_position, contested_tile_position, tile_is_contested, exiled_tile;
 
         var grid_pos = [0, 0];
-        var tile_size = 40;
+        var tile_size = 45;
         var panning = false;
         var mouse_initial_position = [0, 0];
         var grid_initial_position = [0, 0];
+        var score_pos = [window.innerWidth - 100, window.innerHeight - 100];
 
         var tiles = {};
         var tid = 0;
         var dict = [];
 
+        var score = 0;
+        var time = 100;
+        const seconds = document.getElementById("time-sec");
+        const minutes = document.getElementById("time-min");
+
         const grid = document.getElementById("background");
         const tile_container = document.getElementById("tiles");
 
-        var anchor_pos = snapToGrid([window.innerWidth/2, window.innerHeight/2], false);
+        var anchor_pos = [window.innerWidth/2, window.innerHeight/2];
+        setGridPos(anchor_pos);
 
         const alphamap = {
             " ": { draws: 2, value: 0 },
@@ -127,7 +263,7 @@
 
         fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split("\r\n"));
 
-        document.onmousedown = (e) => {
+        document.onmousedown = document.onpointerdown = (e) => {
             if (e.button == 0 && e.target.classList) {
                 if (e.target.classList.contains("tile")) {
                     target = e.target;
@@ -140,14 +276,14 @@
                 }
             }
         }
-        document.onmouseup = (e) => {
+        document.onmouseup = document.onpointerup = (e) => {
             target = null;
             panning = false;
 
             contested_tile_position = [null, null];
             tile_is_contested = false;
         }
-        document.onmousemove = (e) => {
+        document.onmousemove = document.onpointermove = (e) => {
             if (target) {
                 var tid = target.getAttribute("tid");
                 var mouse_pos = [e.pageX, e.pageY];
@@ -189,6 +325,28 @@
             return document.body.querySelector(`div[tid="${tid}"]`);
         }
 
+        function startTimer() {
+            var time_whole = 100;
+            var time_start = performance.now();
+            updateTimer();
+            setInterval(() => {
+                time = Math.round(time_whole - (performance.now() - time_start)/1000);
+                if (time <= 0) endTimer();
+                updateTimer();
+            }, 1);
+        }
+
+        function updateTimer() {
+            var min = Math.floor(time/60);
+            var sec = time % 60;
+            minutes.innerHTML = min;
+            seconds.innerHTML = sec.toString().length == 1 ? "0" + sec : sec;
+        }
+
+        function take2() {
+            createTileRow(2);
+        }
+
         function tileTwerp(target, position, duration = 0.2) {
             gsap.to(target, {
                 duration: duration,
@@ -196,6 +354,7 @@
                 y: position[1] + "px",
                 overwrite: "auto"
             });
+            determineBorderRadii();
         }
 
         function tileAppear(target) {
@@ -227,6 +386,55 @@
             return position.map((c, i) => (tile_relative ? 0 : grid_pos[i]) + Math.floor((c - grid_pos[i])/tile_size)*tile_size);
         }
 
+        function cloneElement(tile, delay, color = "var(--light-green)") {
+            setTimeout(() => {
+                var copy = tile.element.cloneNode(true);
+                copy.setAttribute("tid", "-1");
+                copy.style.borderRadius = tile_size/5 + "px";
+                copy.style.backgroundColor = color;
+                document.body.appendChild(copy);
+                gsap.set(copy, {
+                    x: tile.position[0] + grid_pos[0],
+                    y: tile.position[1] + grid_pos[1]
+                });
+                gsap.to(copy, {
+                    duration: 0.5,
+                    y: tile.position[1] + grid_pos[1] - tile_size/2,
+                    ease: "power4.out"
+                });
+                gsap.to(copy, {
+                    duration: 1,
+                    delay: 0.5,
+                    x: score_pos[0] + "px",
+                    y: score_pos[1] + "px",
+                    ease: "power4.out"
+                });
+                gsap.to(copy, {
+                    duration: 0.5,
+                    delay: 1.5,
+                    scale: 0
+                });
+                setTimeout(() => document.body.removeChild(copy), 2000);
+            }, delay);
+        }
+
+        function scoreTiles(tiles) {
+            var words = getWordMap(tiles);
+            var tsum = 0;
+            var score = 0;
+            for (var i = 0; i < words.length; i++) {
+                if (words[i].valid) createTimeout(i);
+                score += getWordScore(words[i].word);
+            }
+
+            function createTimeout(i, delay = 0, color = "var(--light-green)") {
+                setTimeout(() => {
+                    for (var j = 0; j < words[i].tiles.length; j++) cloneElement(words[i].tiles[j], j*100, color);
+                }, tsum);
+                tsum += words[i].tiles.length*100 + 500 + delay;
+            }
+        }
+
         function createTile(letter, value, position, delay = 0) {
             const stid = JSON.parse(JSON.stringify(tid));
             tid++;
@@ -247,12 +455,36 @@
             return stid;
         }
 
+        function determineBorderRadii() {
+            for (var tile of Object.values(tiles)) {
+                // top-left, top-right, bottom-right, bottom-left
+                var el = tile.element;
+                var radius = tile_size/5;
+                var vert = [false, false];
+                var horiz = [false, false];
+                for (var stile of Object.values(tiles)) {
+                    if (stile.tid != tile.tid) {
+                        if (stile.position[1] == tile.position[1]) {
+                            if (stile.position[0] == tile.position[0] + tile_size) horiz[1] = true;
+                            else if (stile.position[0] == tile.position[0] - tile_size) horiz[0] = true;
+                        }
+                        else if (stile.position[0] == tile.position[0]) {
+                            if (stile.position[1] == tile.position[1] + tile_size) vert[1] = true;
+                            else if (stile.position[1] == tile.position[1] - tile_size) vert[0] = true;
+                        }
+                    }
+                }
+                var borders = [vert[0] || horiz[0], vert[0] || horiz[1], vert[1] || horiz[1], vert[1] || horiz[0]];
+                el.style.borderRadius = `${borders[0] ? 0 : radius}px ${borders[1] ? 0 : radius}px ${borders[2] ? 0 : radius}px ${borders[3] ? 0 : radius}px`;
+            }
+        }
+
         function pickRandomTile() {
             return alphaweightmap[Math.round(Math.random() * (alphaweightmap.length - 1))];
         }
 
         function createTileRow(size) {
-            var pos = [anchor_pos[0] - Math.round(size/2)*tile_size, anchor_pos[1]];
+            var pos = [-Math.round(size/2)*tile_size, 0];
             if (Object.keys(tiles).length > 0) {
                 var vertex_tile = Math.max.apply(null, Object.keys(tiles).map((tile) => tiles[tile].position[1]));
                 pos[1] = vertex_tile + tile_size*2;
@@ -262,7 +494,7 @@
                 createTile(random_tile, alphamap[random_tile].value, JSON.parse(JSON.stringify(pos)), i*100);
                 pos[0] += tile_size;
             }
-            setGridPos([0, -pos[1] + anchor_pos[1]], 0.5, "power4.out");
+            setGridPos([anchor_pos[0] + tile_size*(size % 2)*0.5, -pos[1] + anchor_pos[1]], 0.5, "power4.out");
         }
 
         function getAllWords(tiles) {
@@ -384,14 +616,20 @@
             return singles;
         }
 
-        function getScore(tiles) {
-            var words = getAllWords(tiles);
-            words = checkValidWords(words);
-            words = calculateConnectionPenalties(words);
-            console.log(words);
+        // function getScore(tiles) {
+        //     var score = 0;
+        //     var words = getWordMap(tiles);
+        //     for (var group of words) score += (group.valid ? 1 : 0)*group.word.split("").reduce((psum, c) => psum + alphamap[c].value, 0);
+        //     return score;
+        // }
 
+        function getWordScore(word) {
+            return word.split("").reduce((psum, c) => psum + alphamap[c].value, 0)
+        }
+
+        function getScore(words) {
             var score = 0;
-            for (var group of words) score += (group.valid ? 1 : 0)*group.word.split("").reduce((psum, c) => psum + alphamap[c].value, 0);
+            for (var group of words) score += (group.valid ? 1 : 0)*getWordScore(group.word);
             return score;
         }
 
@@ -447,7 +685,8 @@
         function calculateConnectionPenalties(words) {
             var word_map = words;
             var groups = getConsecutiveTileGroups(tiles);
-            var penalized_groups = groups.filter((_, i, arr) => i != arr.indexOf(arr.reduce((a, b) => b.length > a.length ? b : a)));
+            var scores = groups.map((c) => getScore(checkValidWords(getAllWords(c))));
+            var penalized_groups = groups.filter((c, i) => i != scores.indexOf(Math.max(...scores)));
             var penalized_tile_tids = penalized_groups.flat().map((c) => c.tid);
             var singles = penalized_groups.filter((c) => c.length == 1);
             for (var group of word_map) {
@@ -456,12 +695,19 @@
                 }
             }
             for (var tile of singles) word_map.push({ word: tile[0].letter, tiles: [tile[0]], valid: false });
+            return word_map;
+        }
+
+        function getWordMap(tiles) {
+            var words = getAllWords(tiles);
+            words = checkValidWords(words);
+            words = calculateConnectionPenalties(words);
             return words;
         }
 
         createTileRow(7);
+        startTimer();
         //createTileRow(2);
-        getScore(tiles);
     </script>
 </body>
 

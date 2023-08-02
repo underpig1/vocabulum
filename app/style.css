@@ -1,0 +1,69 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+@property --pos {
+    syntax: '<number>';
+    initial-value: 0;
+    inherits: false;
+}
+
+@property --tab {
+    syntax: '<number>';
+    initial-value: 0;
+    inherits: true;
+}
+
+.main {
+    --tab: 0;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+}
+
+@property --shift {
+    syntax: '<number>';
+    initial-value: 0;
+    inherits: false;
+}
+
+.tab {
+    --pos: 0;
+    --shift: calc(var(--tab) - var(--pos));
+    position: absolute;
+    width: calc(100% - 24px);
+    height: 70%;
+    bottom: 12px;
+    border-radius: 20px;
+    background-color: #a0ff80ff;
+    transform: translate(calc(var(--shift)*-110%), calc(max(var(--shift), -1*var(--shift))*25px)) rotateZ(calc(var(--shift)*-5deg)) scale(calc(1 - max(var(--shift), -1*var(--shift))/10));
+    opacity: calc(1 - max(var(--shift), -1*var(--shift))*0.1);
+}
+
+@keyframes move {
+    from {
+        --tab: 0;
+    }
+
+    25% {
+        --tab: -3;
+    }
+
+    75% {
+        --tab: 3;
+    }
+
+    to {
+        --tab: 0;
+    }
+}
