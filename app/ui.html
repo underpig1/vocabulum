@@ -6,53 +6,338 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
+
+        /* @property --pos {
+            syntax: '<number>';
+            initial-value: 0;
+            inherits: false;
+        } */
+
+        /* @property --tab {
+            syntax: '<number>';
+            initial-value: 0;
+            inherits: true;
+        } */
+
+        .main {
+            --tab: 0;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+        }
+
+        /* @property --shift {
+            syntax: '<number>';
+            initial-value: 0;
+            inherits: false;
+        } */
+
+        .tab {
+            --pos: 0;
+            --shift: calc(var(--tab) - var(--pos));
+            --background-color: #a0ff80ff;
+            position: absolute;
+            width: calc(100% - 24px);
+            height: 70%;
+            bottom: 12px;
+            border-radius: 20px;
+            background-color: var(--background-color);
+            transform: translate(calc(var(--shift)*-110%), calc(max(var(--shift), -1*var(--shift))*25px)) rotateZ(calc(var(--shift)*-5deg)) scale(calc(1 - max(var(--shift), -1*var(--shift))/10));
+            opacity: calc(1 - max(var(--shift), -1*var(--shift))*0.1);
+            padding: 50px;
+            background-image: url("img/background.png");
+            background-size: contain;
+            background-position: bottom left calc(var(--shift)*100px);
+            background-repeat: no-repeat;
+        }
+
+        .tab-icon {
+            position: absolute;
+            width: 85px;
+            top: -88px;
+            transform: translateX(calc(var(--shift)*-100px));
+        }
+
+        .tab-title {
+            margin: 0;
+            transform: translateX(calc(var(--shift)*-125px));
+        }
+
+        .tab-description {
+            margin: 0;
+            transform: translateX(calc(var(--shift)*-100px));
+        }
+
+        .tab-start {
+            position: absolute;
+            width: 100%;
+            height: 70px;
+            border: 3px solid #333;
+            box-shadow: 0 5px 0 0 #333;
+            border-radius: 15px;
+            background-color: var(--background-color);
+            font-weight: 600;
+            font-size: 11pt;
+            font-family: inherit;
+            color: inherit;
+            bottom: 25px;
+            text-align: left;
+            padding: 0 35px;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .tab-start:active {
+            transform: translateY(5px);
+            box-shadow: 0 0 0 0;
+        }
+
+        .button-icon {
+            position: absolute;
+            width: 18px;
+            right: 35px;
+            top: 50%;
+            bottom: 50%;
+            transform: translateY(-50%);
+        }
+
+        .swipe-tip {
+            position: absolute;
+            display: flex;
+            left: 50%;
+            right: 50%;
+            width: 100px;
+            transform: translateX(-50%);
+            bottom: -25px;
+            font-weight: 600;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0.5;
+            font-size: 11pt;
+        }
+
+        .swipe-tip .arrow {
+            width: 20px;
+        }
+
+        /* .tab-squares {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            clip-path: inset(0 round 20px);
+        }
+
+        .tab-square {
+            position: absolute;
+            --size: 50px;
+            --offset: 50px;
+            width: var(--size);
+            height: var(--size);
+            background-color: #333;
+            left: var(--offset);
+            bottom: calc(0px - var(--size) - 25px);
+            animation: square-shift 10s infinite linear;
+            z-index: -1;
+        }
+
+        .tab-squares .tab-square:nth-child(1) {
+            --size: 150px;
+            --offset: 15px;
+            animation-duration: 25s;
+            animation-delay: -15s;
+        }
+
+        .tab-squares .tab-square:nth-child(2) {
+            --size: 50px;
+            --offset: 200px;
+            animation-duration: 15s;
+            animation-delay: -3s;
+        }
+
+        .tab-squares .tab-square:nth-child(3) {
+            --size: 25px;
+            --offset: 150px;
+            animation-duration: 10s;
+            animation-delay: -5s;
+        }
+
+        .tab-squares .tab-square:nth-child(4) {
+            --size: 50px;
+            --offset: 150px;
+            animation-duration: 12s;
+            animation-delay: -11s;
+        }
+
+        .tab-squares .tab-square:nth-child(5) {
+            --size: 150px;
+            --offset: 250px;
+            animation-duration: 30s;
+            animation-delay: 0s;
+        }
+
+        .tab-squares .tab-square:nth-child(6) {
+            --size: 125px;
+            --offset: 225px;
+            animation-duration: 25s;
+            animation-delay: 0s;
+        }
+
+        .tab-squares .tab-square:nth-child(6) {
+            --size: 125px;
+            --offset: 300px;
+            animation-duration: 30s;
+            animation-delay: -15s;
+        }
+
+        .tab-squares .tab-square:nth-child(7) {
+            --size: 150px;
+            --offset: 150px;
+            animation-duration: 30s;
+            animation-delay: 5s;
+        }
+
+        .tab-squares .tab-square:nth-child(8) {
+            --size: 125px;
+            --offset: 150px;
+            animation-duration: 45s;
+            animation-delay: -40s;
+        }
+
+        .tab-squares .tab-square:nth-child(9) {
+            --size: 175px;
+            --offset: 150px;
+            animation-duration: 50s;
+            animation-delay: -10s;
+        }
+
+        .tab-squares .tab-square:nth-child(10) {
+            --size: 125px;
+            --offset: 150px;
+            animation-duration: 25s;
+            animation-delay: 2s;
+        }
+
+        @keyframes square-shift {
+            from {
+                left: calc(var(--offset) - 50%);
+                bottom: calc(0px - var(--size) - 25px);
+                transform: rotate(0);
+            }
+
+            to {
+                left: calc(100% - 50px);
+                bottom: calc(100% - 100px);
+                transform: rotate(300deg) scale(0);
+            }
+        } */
+
+        @media only screen and (max-height: 600px) {
+            .tab {
+                
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="main" id="main">
-        <div class="tab" style="--pos: -3; background-color: #f59060ff">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
+        <div class="tab" style="--pos: -3; --background-color: #f59060ff">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/stuff-icon.png">
+                <h1 class="tab-title">underpig1</h1>
             </div>
         </div>
-        <div class="tab" style="--pos: -2; background-color: #90d0ffff">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
+        <div class="tab" style="--pos: -2; --background-color: #90d0ffff">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/stuff-icon.png">
+                <h1 class="tab-title">my stuff</h1>
+                <p class="tab-description">customize your experience.</p>
             </div>
         </div>
-        <div class="tab" style="--pos: -1; background-color: #76eae0ff">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
+        <div class="tab" style="--pos: -1; --background-color: #76eae0ff">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/missions-icon.png">
+                <h1 class="tab-title">missions</h1>
+                <p class="tab-description">complete missions to earn points and unlock prizes.</p>
             </div>
         </div>
-        <div class="tab" style="--pos: 0; background-color: #a0ff80ff;">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
+        <div class="tab" style="--pos: 0; --background-color: #a0ff80ff;">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/classic-icon.png">
+                <h1 class="tab-title">classic</h1>
+                <p class="tab-description">the classic vocabulum experience. no surprises.</p>
+                <button class="tab-start">Play classic<img class="button-icon" src="img/classic-mark.png"></button>
+                <div class="swipe-tip"><img class="arrow" src="img/arrow-left.png"><span>swipe</span><img class="arrow" src="img/arrow-right.png"></div>
+            </div>
+            <!-- <div class="tab-squares">
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+                <div class="tab-square"></div>
+            </div> -->
+        </div>
+        <div class="tab" style="--pos: 1; --background-color: #e0b0ffff;">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/versus-icon.png">
+                <h1 class="tab-title">online versus</h1>
+                <p class="tab-description">casual play against a friend or stranger online.</p>
+                <button class="tab-start" style="height: 65px; bottom: 100px;">Invite friend<img class="button-icon" src="img/plus-icon.png"></button>
+                <button class="tab-start" style="height: 65px;">Play versus<img class="button-icon" src="img/versus-mark.png" style="width: 11px;"></button>
+                <div class="swipe-tip"><img class="arrow" src="img/arrow-left.png"><span>swipe</span><img class="arrow" src="img/arrow-right.png"></div>
             </div>
         </div>
-        <div class="tab" style="--pos: 1; background-color: #e0b0ffff;">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
+        <div class="tab" style="--pos: 2; --background-color: #ff6060ff;">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/masters-icon.png">
+                <h1 class="tab-title">masters</h1>
+                <p class="tab-description">compete against other players online for a rank.</p>
+                <button class="tab-start">Play versus<img class="button-icon" src="img/masters-mark.png"></button>
+                <div class="swipe-tip"><img class="arrow" src="img/arrow-left.png"><span>swipe</span><img class="arrow" src="img/arrow-right.png"></div>
             </div>
         </div>
-        <div class="tab" style="--pos: 2; background-color: #ff6060ff;">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
-            </div>
-        </div>
-        <div class="tab" style="--pos: 3; background-color: #ffc060ff;">
-            <div style="width: 100%; height: 100%; position: relative">
-                <div></div>
+        <div class="tab" style="--pos: 3; --background-color: #ffc060ff;">
+            <div style="width: 100%; height: 100%; position: relative;">
+                <img class="tab-icon" src="img/rush-icon.png">
+                <h1 class="tab-title">rush</h1>
+                <p class="tab-description">a daily extra challenging game mode for the vocab-minded.</p>
+                <button class="tab-start">Play rush<img class="button-icon" src="img/rush-mark.png"></button>
+                <div class="swipe-tip"><img class="arrow" src="img/arrow-left.png"><span>swipe</span><img class="arrow" src="img/arrow-right.png"></div>
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
         const main = document.getElementById("main");
         var pointer = {};
         var tab = 0;
         var diff = 0;
+        var tween;
+        var t = 0;
+        var prevtab = 0;
 
         main.ontouchstart = (e) => {
+            t = performance.now();
             main.style.transition = "none";
             const touch = e.touches[0];
             if (touch) pointer = {
@@ -60,6 +345,10 @@
                 y: touch.screenY,
                 pressed: true
             }
+            diff = 0;
+            tab = parseFloat(window.getComputedStyle(main).getPropertyValue("--tab"));
+            prevtab = JSON.parse(JSON.stringify(tab));
+            if (tween) tween.kill();
         }
         main.ontouchmove = (e) => {
             const touch = e.touches[0];
@@ -67,14 +356,24 @@
                 const x = touch.screenX;
                 if (pointer.pressed) {
                     diff = (pointer.x - x)/window.innerWidth;
-                    main.style.setProperty("--tab", tab + diff);
+                    gsap.to(main, {
+                        "--tab": Math.round((tab + diff)*1000)/1000,
+                        duration: 0.1
+                    });
                 }
             }
         }
         main.ontouchend = (e) => {
-            main.style.transition = "--tab 0.5s";
-            main.style.setProperty("--tab", tab = tab + Math.round(diff));
-            pointer.pressed = false;
+            var tabvar = parseFloat(window.getComputedStyle(main).getPropertyValue("--tab"));
+            tab = Math.round(tabvar + diff);
+            tab = Math.abs(prevtab - tab) > 1 ? diff > 0 ? prevtab + 1 : prevtab - 1 : tab;
+            tab = tab > 3 ? 3 : tab < -3 ? -3 : tab;
+            tab = Math.abs(diff) < 0.05 ? prevtab : tab;
+            tween = gsap.to(main, {
+                "--tab": Math.round(tab*1000)/1000,
+                duration: 0.2,
+                ease: "power4.out"
+            });
         }
     </script>
 </body>

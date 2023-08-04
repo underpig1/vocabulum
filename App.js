@@ -1,7 +1,7 @@
 import React from "react";
 import { useWindowDimensions } from "react-native";
 import WebView from "react-native-webview";
-const index = require("./app/mobile.html");
+const index = require("./app/ui.html");
 
 export default function App() {
   const { width } = useWindowDimensions();
