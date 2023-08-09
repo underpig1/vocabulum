@@ -133,132 +133,38 @@
             width: 20px;
         }
 
-        /* .tab-squares {
+        .icon {
             position: absolute;
-            left: 0;
-            top: 0;
+            display: flex;
+            left: 50px;
+            top: 50px;
             width: 100%;
-            height: 100%;
-            opacity: 0.1;
-            clip-path: inset(0 round 20px);
+            height: 35px;
+            align-items: center;
         }
 
-        .tab-square {
-            position: absolute;
-            --size: 50px;
-            --offset: 50px;
-            width: var(--size);
-            height: var(--size);
-            background-color: #333;
-            left: var(--offset);
-            bottom: calc(0px - var(--size) - 25px);
-            animation: square-shift 10s infinite linear;
-            z-index: -1;
+        .icon > h1 {
+            font-size: 20pt;
         }
 
-        .tab-squares .tab-square:nth-child(1) {
-            --size: 150px;
-            --offset: 15px;
-            animation-duration: 25s;
-            animation-delay: -15s;
+        .icon > img {
+            width: 35px;
+            margin-right: 20px;
         }
 
-        .tab-squares .tab-square:nth-child(2) {
-            --size: 50px;
-            --offset: 200px;
-            animation-duration: 15s;
-            animation-delay: -3s;
-        }
-
-        .tab-squares .tab-square:nth-child(3) {
-            --size: 25px;
-            --offset: 150px;
-            animation-duration: 10s;
-            animation-delay: -5s;
-        }
-
-        .tab-squares .tab-square:nth-child(4) {
-            --size: 50px;
-            --offset: 150px;
-            animation-duration: 12s;
-            animation-delay: -11s;
-        }
-
-        .tab-squares .tab-square:nth-child(5) {
-            --size: 150px;
-            --offset: 250px;
-            animation-duration: 30s;
-            animation-delay: 0s;
-        }
-
-        .tab-squares .tab-square:nth-child(6) {
-            --size: 125px;
-            --offset: 225px;
-            animation-duration: 25s;
-            animation-delay: 0s;
-        }
-
-        .tab-squares .tab-square:nth-child(6) {
-            --size: 125px;
-            --offset: 300px;
-            animation-duration: 30s;
-            animation-delay: -15s;
-        }
-
-        .tab-squares .tab-square:nth-child(7) {
-            --size: 150px;
-            --offset: 150px;
-            animation-duration: 30s;
-            animation-delay: 5s;
-        }
-
-        .tab-squares .tab-square:nth-child(8) {
-            --size: 125px;
-            --offset: 150px;
-            animation-duration: 45s;
-            animation-delay: -40s;
-        }
-
-        .tab-squares .tab-square:nth-child(9) {
-            --size: 175px;
-            --offset: 150px;
-            animation-duration: 50s;
-            animation-delay: -10s;
-        }
-
-        .tab-squares .tab-square:nth-child(10) {
-            --size: 125px;
-            --offset: 150px;
-            animation-duration: 25s;
-            animation-delay: 2s;
-        }
-
-        @keyframes square-shift {
-            from {
-                left: calc(var(--offset) - 50%);
-                bottom: calc(0px - var(--size) - 25px);
-                transform: rotate(0);
-            }
-
-            to {
-                left: calc(100% - 50px);
-                bottom: calc(100% - 100px);
-                transform: rotate(300deg) scale(0);
-            }
-        } */
-
-        @media only screen and (max-height: 600px) {
+        @media only screen and (max-height: 800px) {
             .tab {
-                
+                height: 80%;
             }
         }
     </style>
 </head>
 <body>
     <div class="main" id="main">
+        <div class="icon"><img src="img/icon.png"><h1>vocabulum</h1></div>
         <div class="tab" style="--pos: -3; --background-color: #f59060ff">
             <div style="width: 100%; height: 100%; position: relative;">
-                <img class="tab-icon" src="img/stuff-icon.png">
+                <img class="tab-icon" style="width: 75px; top: -90px;" src="img/icon.png">
                 <h1 class="tab-title">underpig1</h1>
             </div>
         </div>
