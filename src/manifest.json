@@ -1,0 +1,13 @@
+{
+  "name": "Vocabulum",
+  "short_name": "Vocabulum",
+  "start_url": "ui.html",
+  "display": "standalone",
+  "icons": [{
+    "src": "assets/logo.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }],
+  "background_color": "#f9be74",
+  "theme_color": "#f9be74"
+}

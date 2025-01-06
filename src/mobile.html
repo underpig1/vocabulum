@@ -169,6 +169,7 @@
             font-weight: 1000;
             color: #333;
             transform: translateY(-5px);
+            z-index: 2;
         }
 
         .buttons {
@@ -199,12 +200,7 @@
     </div>
     <h1 class="ui timer"><span id="time-min">0</span>:<span id="time-sec">00</span></h1>
     <h1 class="ui score">0</h1>
-    <div class="buttons">
-        <div class="button">rush</div>
-        <div class="button" style="background-color: var(--light-yellow)">tutorial</div>
-        <div class="button" style="background-color: var(--light-green)">versus</div>
-    </div>
-    <div class="ui take-2" onclick="take2()">
+    <div class="ui take-2" onclick="scoreTiles(tiles);">
         <div class="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path
@@ -232,6 +228,7 @@
         var time = 100;
         const seconds = document.getElementById("time-sec");
         const minutes = document.getElementById("time-min");
+        var score_allowed = true;
 
         const grid = document.getElementById("background");
         const tile_container = document.getElementById("tiles");
@@ -274,27 +271,34 @@
 
         fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split("\r\n"));
 
-        document.onmousedown = document.onpointerdown = (e) => {
-            if (e.button == 0 && e.target.classList) {
-                if (e.target.classList.contains("tile")) {
-                    target = e.target;
+        document.ontouchstart = (e) => {
+            const touch = e.touches[0];
+            if (touch) {
+                console.log(touch.target);
+                if (touch.target.classList.contains("tile")) {
+                    target = touch.target;
                     target_initial_position = tiles[target.getAttribute("tid")].position;
                     tile_shadow.style.opacity = 1;
                     target.style.zIndex = 3;
-                    var mouse_pos = [e.pageX, e.pageY];
-                    var snap_pos = snapToGrid(mouse_pos);
-                    tileTwerp(tile_shadow, snap_pos, 0);
+
+                    var tid = target.getAttribute("tid");
+                    var mouse_pos = [touch.pageX, touch.pageY];
+                    var snap_pos = resolveGridPos(mouse_pos);
+                    tiles[tid].position = snap_pos;
+                    tileTwerp(target, snap_pos, 0.1);
+                    tileTwerp(tile_shadow, snapToGrid(mouse_pos), 0);
                 }
                 else {
                     panning = true;
-                    mouse_initial_position = [e.pageX, e.pageY];
+                    mouse_initial_position = [touch.pageX, touch.pageY];
                     grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
                 }
             }
         }
-        document.onmouseup = document.onpointerup = (e) => {
-            if (target) {
-                var mouse_pos = [e.pageX, e.pageY];
+        document.ontouchend = (e) => {
+            const touch = e.changedTouches[0];
+            if (target && touch) {
+                var mouse_pos = [touch.pageX, touch.pageY];
                 var snap_pos = snapToGrid(mouse_pos);
                 var tid = target.getAttribute("tid");
                 tiles[tid].position = snap_pos;
@@ -334,10 +338,11 @@
             contested_tile_position = [null, null];
             tile_is_contested = false;
         }
-        document.onmousemove = document.onpointermove = (e) => {
-            if (target) {
+        document.ontouchmove = (e) => {
+            const touch = e.touches[0];
+            if (target && touch) {
                 var tid = target.getAttribute("tid");
-                var mouse_pos = [e.pageX, e.pageY];
+                var mouse_pos = [touch.pageX, touch.pageY];
                 var snap_pos = resolveGridPos(mouse_pos);
 
                 // if (tile_is_contested) {
@@ -367,8 +372,8 @@
                 tileTwerp(target, snap_pos, 0.1);
                 tileTwerp(tile_shadow, snapToGrid(mouse_pos));
             }
-            else if (panning) {
-                var mouse_pos = [e.pageX, e.pageY];
+            else if (panning && score_allowed) {
+                var mouse_pos = [touch.pageX, touch.pageY];
                 setGridPos(grid_initial_position.map((c, i) => c + mouse_pos[i] - mouse_initial_position[i]));
             }
         }
@@ -381,18 +386,27 @@
             var time_whole = 100;
             var time_start = performance.now();
             updateTimer();
-            setInterval(() => {
+            var time_inter = setInterval(() => {
                 time = Math.round(time_whole - (performance.now() - time_start)/1000);
-                if (time <= 0) endTimer();
+                if (time <= 0) {
+                    endTimer();
+                    clearInterval(time_inter);
+                }
                 updateTimer();
             }, 1);
         }
 
         function updateTimer() {
-            var min = Math.floor(time/60);
-            var sec = time % 60;
-            minutes.innerHTML = min;
-            seconds.innerHTML = sec.toString().length == 1 ? "0" + sec : sec;
+            if (score_allowed) {
+                var min = Math.floor(time / 60);
+                var sec = time % 60;
+                minutes.innerHTML = min;
+                seconds.innerHTML = sec.toString().length == 1 ? "0" + sec : sec;
+            }
+        }
+
+        function endTimer() {
+
         }
 
         function take2() {
@@ -442,32 +456,34 @@
             return position.map((c, i) => c - (tile_relative ? grid_pos[i] : 0) - tile_size/2);
         }
 
-        function cloneElement(tile, delay, color = "var(--light-green)") {
+        function cloneElement(tile, delay, color = "var(--light-green)", wild = false) {
             setTimeout(() => {
                 var copy = tile.element.cloneNode(true);
                 copy.setAttribute("tid", "-1");
                 copy.style.borderRadius = tile_size/5 + "px";
                 copy.style.backgroundColor = color;
+                copy.style.boxShadow = "0 0 5px #00000033";
                 document.body.appendChild(copy);
                 gsap.set(copy, {
                     x: tile.position[0] + grid_pos[0],
-                    y: tile.position[1] + grid_pos[1]
+                    y: tile.position[1] + grid_pos[1],
                 });
                 gsap.to(copy, {
                     duration: 0.5,
-                    y: tile.position[1] + grid_pos[1] - tile_size/2,
+                    y: tile.position[1] + grid_pos[1] - tile_size/2 + Math.random()*5,
                     ease: "power4.out"
                 });
+                var score_ui_rect = document.querySelector(".ui.score").getBoundingClientRect();
                 gsap.to(copy, {
                     duration: 1,
                     delay: 0.5,
-                    x: score_pos[0] + "px",
-                    y: score_pos[1] + "px",
+                    x: score_ui_rect.left + score_ui_rect.width/2 - tile_size/2 + "px",
+                    y: score_ui_rect.top - tile_size/2 + 10 + "px",
                     ease: "power4.out"
                 });
                 gsap.to(copy, {
                     duration: 0.5,
-                    delay: 1.5,
+                    delay: 1.0,
                     scale: 0
                 });
                 setTimeout(() => document.body.removeChild(copy), 2000);
@@ -475,16 +491,27 @@
         }
 
         function scoreTiles(tiles) {
-            var words = getWordMap(tiles);
-            var score = 0;
-            var delay = 0;
-            for (var i = 0; i < words.length; i++) {
-                for (var j = 0; j < words[i].tiles.length; j++) {
-                    const tile = words[i].tiles[j];
-                    cloneElement(tile, delay);
-                    delay += 50;
+            if (score_allowed) {
+                score_allowed = false;
+                var words = getWordMap(tiles);
+                var score = 0;
+                var delay = 0;
+                for (var i = 0; i < words.length; i++) {
+                    var s = (words[i].valid ? 1 : -1)*getWordScore(words[i].word);
+                    score += s;
+                    for (var j = 0; j < words[i].tiles.length; j++) {
+                        const tile = words[i].tiles[j];
+                        cloneElement(tile, delay, words[i].valid ? "var(--light-green)" : (words[i].disconnected ? "var(--light-yellow)" : "var(--light-red)"));
+                        delay += 50;
+                    }
                 }
-                score += getWordScore(words[i].word);
+                var score_ui = document.querySelector(".ui.score");
+                var bonus = score > score_ui.innerText;
+                for (var i = 0; i < Math.abs(score - score_ui.innerText); i++) setTimeout(() => score_ui.innerText = parseInt(score_ui.innerText) + (bonus ? 1 : -1), delay + 1000 + i * 10);
+                setTimeout(() => {
+                    take2();
+                    score_allowed = true;
+                }, delay + 500);
             }
         }
 
@@ -744,7 +771,10 @@
             var singles = penalized_groups.filter((c) => c.length == 1);
             for (var group of word_map) {
                 for (var tile of group.tiles) {
-                    if (penalized_tile_tids.includes(tile.tid)) group.valid = false;
+                    if (penalized_tile_tids.includes(tile.tid)) {
+                        if (group.valid) group.disconnected = true;
+                        group.valid = false;
+                    }
                 }
             }
             for (var tile of singles) word_map.push({ word: tile[0].letter, tiles: [tile[0]], valid: false });

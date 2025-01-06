@@ -1,6 +1,6 @@
 {
   "appId": "com.example.app",
-  "appName": "Vocabulum",
+  "appName": "vocabulum",
   "bundledWebRuntime": false,
   "webDir": "dist",
   "plugins": {

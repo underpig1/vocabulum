@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700;1000&display=swap" rel="stylesheet">
+    <title>Vocabulum</title>
+    <style>
+        :root {
+            --bg-grid-color: #00000017;
+            --tile-size: 100px;
+            --tile-color: #f9be74ff;
+            --font-color: #333;
+
+            --light-red: #ff9080ff;
+            --light-yellow: #f0df70ff;
+            --light-green: #80df70ff;
+        }
+
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            touch-action: manipulation;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #background {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            background-size: calc(var(--tile-size)/2) calc(var(--tile-size)/2);
+            background-image: linear-gradient(to right, var(--bg-grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--bg-grid-color) 1px, transparent 1px);
+            background-position: 0 0;
+        }
+
+        .tile {
+            position: absolute;
+            width: var(--tile-size);
+            height: var(--tile-size);
+            background-color: var(--tile-color);
+            border-radius: calc(var(--tile-size)/5);
+            text-align: center;
+            line-height: calc(var(--tile-size) + var(--tile-size)/12);
+            font-size: calc(var(--tile-size)/1.7);
+            font-family: 'Comfortaa', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            transition: border-radius 0.2s;
+            /* transition: transform 0.2s, top 0.1s, left 0.1s; */
+        }
+
+        #tile-shadow {
+            background-color: #00000055;
+            opacity: 0;
+            z-index: 2;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .tile:active {
+            /* transform: scale(0.85); */
+        }
+
+        .tile>.value {
+            position: absolute;
+            left: calc(var(--tile-size)/7);
+            top: calc(var(--tile-size)/7);
+            line-height: calc(var(--tile-size)/4);
+            font-size: calc(var(--tile-size)/4);
+            pointer-events: none;
+        }
+
+        #tiles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+    <style>
+        .nav {
+            position: absolute;
+            width: 100%;
+            height: 100px;
+            top: 0;
+            padding: 0 50px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h2 {
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 600;
+            font-size: 16pt;
+            cursor: pointer;
+        }
+
+        h2::after {
+            display: inline-block;
+            content: " >";
+            transform: translateX(10px);
+            transition: transform 0.1s ease;
+        }
+
+        h2:hover::after {
+            transform: translateX(20px);
+        }
+
+        .actions {
+            position: absolute;
+            display: flex;
+            top: 50px;
+            width: 50%;
+            height: 80%;
+            right: 0;
+            margin: 100px 0;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .action {
+            position: relative;
+            display: flex;
+            float: right;
+            flex: 1;
+            flex-direction: column;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            padding: 0 50px;
+            cursor: pointer;
+            margin-bottom: 50px;
+            transform: none;
+            transition: width 0.2s ease;
+            clip-path: inset(0);
+        }
+
+        .action-bg {
+            position: absolute;
+            display: block;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url(background.png);
+            background-position: 100% center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateX(20%) translateY(-20px) rotateZ(2deg);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .action.classic {
+            background-color: #70f040c0;
+            --width: 105%;
+            width: var(--width);
+        }
+
+        .action.host {
+            background-color: #ffd140c0;
+            --width: 100%;
+            width: var(--width);
+        }
+
+        .action.join {
+            background-color: #ff2040c0;
+            --width: 95%;
+            width: var(--width);
+        }
+
+        .action-text {
+            width: 100%;
+            height: max-content;
+            transition: transform 0.2s;
+        }
+
+        .header {
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 700;
+            font-size: 40pt;
+            width: 450px;
+            height: 70px;
+            fill: white;
+            transition: transform 0.2s ease, margin-left 0.2s ease;
+        }
+
+        .text-stroke {
+            fill: white;
+            stroke: black;
+            stroke-width: 16px;
+            stroke-linejoin: round;
+            paint-order: stroke;
+        }
+
+        .description {
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            font-size: 16pt;
+            color: black;
+            margin: 0;
+            margin-top: 15px;
+        }
+
+        .action:hover {
+            width: calc(var(--width) + 40px);
+        }
+
+        .action:hover .action-bg {
+            opacity: 1;
+            transform: translateX(0) rotateZ(0);
+        }
+
+        .action:hover .header {
+            transform: translateX(5px) scale(1.08);
+        }
+
+        .hero {
+            position: absolute;
+            display: flex;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            left: 0;
+            margin: 0;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .hero-text {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hero h1, .mobile-hero h1 {
+            position: relative;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 700;
+            font-size: 80pt;
+            line-height: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .version {
+            font-family: 'Poppins', Helvetica, sans-serif;
+            opacity: 0.3;
+            position: absolute;
+            left: 50px;
+            bottom: 25px;
+            pointer-events: none;
+        }
+
+        .mobile-hero {
+            display: none;
+            position: absolute;
+            top: 100px;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-hero h1 {
+            font-size: 24pt;
+            font-weight: 500;
+            opacity: 0.5
+        }
+
+        @media only screen and (max-width: 1600px) {
+            :root {
+                --tile-size: 75px;
+            }
+
+            .hero h1 {
+                font-size: 52pt;
+            }
+
+            .action {
+                padding: 0 35px;
+            }
+        }
+
+        @media only screen and (max-width: 1100px), screen and (max-height: 900px) {
+            .header {
+                font-size: 28pt;
+                margin-top: -12px;
+                margin-left: -8px;
+            }
+
+            .action:hover .header {
+                margin-left: 0;
+            }
+
+            .text-stroke {
+                stroke-width: 10px;
+            }
+
+            .description {
+                font-size: 12pt;
+                margin-top: -2px;
+            }
+        }
+
+        @media only screen and (max-height: 800px) {
+            .actions {
+                top: 20px;
+                height: 80%;
+            }
+
+            .action {
+                margin-bottom: 0;
+            }
+
+            .action.join {
+                margin-bottom: 50px;
+            }
+        }
+
+        @media only screen and (max-width: 900px) {
+            .hero {
+                display: none;
+            }
+
+            .actions {
+                width: 85%;
+            }
+
+            /* .mobile-hero {
+                display: flex;
+            } */
+
+            .nav .links {
+                position: fixed;
+                width: 100%;
+                bottom: 15px;
+                left: 35px;
+                line-height: 0;
+                opacity: 0.5;
+            }
+
+            .version {
+                display: none;
+            }
+
+            .tile {
+                display: none;
+            }
+        }
+
+        @media only screen and (max-width: 400px) {
+            .actions {
+                width: 100%;
+            }
+
+            .action {
+                --width: 100% !important;
+                width: 100% !important;
+            }
+
+            .mobile-hero h1 {
+                font-size: 16pt;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="background"></div>
+    <div id="tiles">
+        <div id="tile-shadow" class="tile"></div>
+    </div>
+    <div class="nav">
+        <img src="icon.svg" style="width: 200px">
+        <div class="links">
+            <h2>more projects</h2>
+        </div>
+    </div>
+    <div class="hero">
+        <div class="hero-text">
+            <h1>the</h1>
+            <h1 id = "rapid-gap"></h1>
+            <h1>word game</h1>
+        </div>
+    </div>
+    <div class="mobile-hero">
+        <h1>the rapid word game</h1>
+    </div>
+    <div class="actions">
+        <div class="action classic">
+            <div class="action-bg"></div>
+            <div class="action-text">
+                <svg class="header" viewBox="0 0 450 70">
+                    <text class="text-stroke" x="10" y="55">CLASSIC <tspan>&#62;</tspan></text>
+                </svg>
+                <p class="description">the classic single-player experience</p>
+            </div>
+        </div>
+        <div class="action host">
+            <div class="action-bg"></div>
+            <div class="action-text">
+                <svg class="header" viewBox="0 0 450 70">
+                    <text class="text-stroke" x="10" y="55">HOST <tspan>&#62;</tspan></text>
+                </svg>
+                <p class="description">start a new group game</p>
+            </div>
+        </div>
+        <div class="action join">
+            <div class="action-bg"></div>
+            <div class="action-text">
+                <svg class="header" viewBox="0 0 450 70">
+                    <text class="text-stroke" x="10" y="55">JOIN <tspan>&#62;</tspan></text>
+                </svg>
+                <p class="description">join a group game</p>
+            </div>
+        </div>
+    </div>
+    <p class="version">version beta1</p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script>
+        var target, target_initial_position, contested_tile_position, tile_is_contested, exiled_tile;
+
+        var grid_pos = [0, 0];
+        var tile_size = 100;
+        var panning = false;
+        var mouse_initial_position = [0, 0];
+        var grid_initial_position = [0, 0];
+
+        var tiles = {};
+        var tid = 0;
+        var dict = [];
+
+        const grid = document.getElementById("background");
+        const tile_container = document.getElementById("tiles");
+        const tile_shadow = document.getElementById("tile-shadow");
+
+        var anchor_pos = [window.innerWidth/2, window.innerHeight/2];
+        setGridPos(anchor_pos);
+
+        window.onresize = (e) => {
+            if (window.innerWidth <= 1600) tile_size = 75;
+            else tile_size = 100;
+
+            for (const stid of Object.keys(tiles)) {
+                tiles[stid].element.remove();
+                delete tiles[stid];
+            }
+        }
+        window.onresize();
+
+        function debounce() {
+            var timer;
+            return () => {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(updateHeroWord, 100);
+            };
+        }
+
+        window.addEventListener("resize", debounce());
+
+        
+        const alphamap = {
+            " ": { draws: 2, value: 0 },
+            "A": { draws: 9, value: 1 },
+            "B": { draws: 2, value: 3 },
+            "C": { draws: 2, value: 3 },
+            "D": { draws: 4, value: 2 },
+            "E": { draws: 12, value: 1 },
+            "F": { draws: 2, value: 4 },
+            "G": { draws: 3, value: 2 },
+            "H": { draws: 2, value: 4 },
+            "I": { draws: 9, value: 1 },
+            "J": { draws: 1, value: 8 },
+            "K": { draws: 1, value: 5 },
+            "L": { draws: 4, value: 1 },
+            "M": { draws: 2, value: 3 },
+            "N": { draws: 6, value: 1 },
+            "O": { draws: 8, value: 1 },
+            "P": { draws: 2, value: 3 },
+            "Q": { draws: 1, value: 10 },
+            "R": { draws: 6, value: 1 },
+            "S": { draws: 4, value: 1 },
+            "T": { draws: 6, value: 1 },
+            "U": { draws: 4, value: 1 },
+            "V": { draws: 2, value: 4 },
+            "W": { draws: 2, value: 4 },
+            "X": { draws: 1, value: 8 },
+            "Y": { draws: 2, value: 4 },
+            "Z": { draws: 1, value: 10 },
+        }
+
+        document.ontouchstart = (e) => {
+            const touch = e.touches[0];
+            if (touch) {
+                if (touch.target.classList.contains("tile")) {
+                    target = touch.target;
+                    target_initial_position = tiles[target.getAttribute("tid")].position;
+                    tile_shadow.style.opacity = 1;
+                    target.style.zIndex = 3;
+
+                    var tid = target.getAttribute("tid");
+                    var mouse_pos = [touch.pageX, touch.pageY];
+                    var snap_pos = resolveGridPos(mouse_pos);
+                    tiles[tid].position = snap_pos;
+                    tileTwerp(target, snap_pos, 0.1);
+                    tileTwerp(tile_shadow, snapToGrid(mouse_pos), 0);
+                }
+                // else {
+                //     panning = true;
+                //     mouse_initial_position = [touch.pageX, touch.pageY];
+                //     grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
+                // }
+            }
+        }
+        document.ontouchend = (e) => {
+            const touch = e.changedTouches[0];
+            if (target && touch) {
+                var mouse_pos = [touch.pageX, touch.pageY];
+                var snap_pos = snapToGrid(mouse_pos);
+                var tid = target.getAttribute("tid");
+                tiles[tid].position = snap_pos;
+                tileTwerp(target, snap_pos);
+                setTimeout(((jt) => target == jt ? null : jt.style.zIndex = 1).bind(null, target), 500);
+                tile_shadow.style.opacity = 0;
+                for (const stid of Object.keys(tiles)) {
+                    if (tiles[stid].position[0] == snap_pos[0] && tiles[stid].position[1] == snap_pos[1] && tid != stid) {
+                        tiles[stid].position = target_initial_position;
+                        tileTwerp(tiles[stid].element, target_initial_position);
+                    }
+                }
+            }
+
+            target = null;
+            panning = false;
+
+            contested_tile_position = [null, null];
+            tile_is_contested = false;
+        }
+        document.ontouchmove = (e) => {
+            const touch = e.touches[0];
+            if (target && touch) {
+                var tid = target.getAttribute("tid");
+                var mouse_pos = [touch.pageX, touch.pageY];
+                var snap_pos = resolveGridPos(mouse_pos);
+                tiles[tid].position = snap_pos;
+                tileTwerp(target, snap_pos, 0.1);
+                tileTwerp(tile_shadow, snapToGrid(mouse_pos));
+            }
+            else if (panning) {
+                var mouse_pos = [touch.pageX, touch.pageY];
+                setGridPos(grid_initial_position.map((c, i) => c + mouse_pos[i] - mouse_initial_position[i]));
+            }
+        }
+
+        document.onmousedown = (e) => {
+            if (e.button == 0 && e.target.classList) {
+                if (e.target.classList.contains("tile")) {
+                    target = e.target;
+                    target_initial_position = tiles[target.getAttribute("tid")].position;
+                    tile_shadow.style.opacity = 1;
+                    target.style.zIndex = 3;
+
+                    var tid = target.getAttribute("tid");
+                    var mouse_pos = [e.pageX, e.pageY];
+                    var snap_pos = resolveGridPos(mouse_pos);
+                    tiles[tid].position = snap_pos;
+                    tileTwerp(target, snap_pos, 0.1);
+                    tileTwerp(tile_shadow, snapToGrid(mouse_pos), 0);
+                }
+                // else {
+                //     panning = true;
+                //     mouse_initial_position = [e.pageX, e.pageY];
+                //     grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
+                // }
+            }
+        }
+        document.onmouseup = (e) => {
+            if (target) {
+                var mouse_pos = [e.pageX, e.pageY];
+                var snap_pos = snapToGrid(mouse_pos);
+                var tid = target.getAttribute("tid");
+                tiles[tid].position = snap_pos;
+                tileTwerp(target, snap_pos);
+                setTimeout(((jt) => target == jt ? null : jt.style.zIndex = 1).bind(null, target), 500);
+                tile_shadow.style.opacity = 0;
+                for (const stid of Object.keys(tiles)) {
+                    if (tiles[stid].position[0] == snap_pos[0] && tiles[stid].position[1] == snap_pos[1] && tid != stid) {
+                        tiles[stid].position = target_initial_position;
+                        tileTwerp(tiles[stid].element, target_initial_position);
+                    }
+                }
+            }
+
+            target = null;
+            panning = false;
+
+            contested_tile_position = [null, null];
+            tile_is_contested = false;
+        }
+        document.onmousemove = (e) => {
+            if (target) {
+                var tid = target.getAttribute("tid");
+                var mouse_pos = [e.pageX, e.pageY];
+                var snap_pos = resolveGridPos(mouse_pos);
+                tiles[tid].position = snap_pos;
+                tileTwerp(target, snap_pos, 0.1);
+                tileTwerp(tile_shadow, snapToGrid(mouse_pos));
+            }
+            else if (panning) {
+                var mouse_pos = [e.pageX, e.pageY];
+                setGridPos(grid_initial_position.map((c, i) => c + mouse_pos[i] - mouse_initial_position[i]));
+            }
+        }
+
+        function selectTileByTID(tid) {
+            return document.body.querySelector(`div[tid="${tid}"]`);
+        }
+
+        function tileTwerp(target, position, duration = 0.2) {
+            gsap.to(target, {
+                duration: duration,
+                x: position[0] + "px",
+                y: position[1] + "px",
+                overwrite: "auto"
+            });
+            determineBorderRadii();
+        }
+
+        function tileAppear(target) {
+            gsap.to(target, {
+                duration: 0.2,
+                scale: 1,
+                overwrite: "auto"
+            });
+        }
+
+        function setGridPos(position, duration = 0.2, ease = "power4.out") {
+            gsap.to(grid, {
+                duration,
+                backgroundPosition: `${position[0]}px ${position[1]}px`,
+                ease,
+                overwrite: "auto"
+            });
+            gsap.to(tile_container, {
+                duration,
+                x: position[0] + "px",
+                y: position[1] + "px",
+                ease,
+                overwrite: "auto"
+            });
+            grid_pos = position;
+        }
+
+        function snapToGrid(position, tile_relative = true) {
+            return position.map((c, i) => (tile_relative ? 0 : grid_pos[i]) + Math.floor((c - grid_pos[i])/tile_size)*tile_size);
+        }
+
+        function resolveGridPos(position, tile_relative = true) {
+            return position.map((c, i) => c - (tile_relative ? grid_pos[i] : 0) - tile_size/2);
+        }
+
+        function createTile(letter, value, position, delay = 0) {
+            const stid = JSON.parse(JSON.stringify(tid));
+            tid++;
+            var tile_element = document.createElement("div");
+            tile_element.classList.add("tile");
+            tile_element.setAttribute("tid", stid);
+            tile_element.setAttribute("letter", letter);
+            tile_element.innerHTML = letter;
+            var value_element = document.createElement("span");
+            value_element.classList.add("value");
+            value_element.innerHTML = value;
+            tile_element.appendChild(value_element);
+            tile_container.appendChild(tile_element);
+            tiles[stid] = { position, element: tile_element, tid: stid, letter };
+            tileTwerp(tile_element, position, 0);
+            gsap.set(tile_element, { scale: 0 });
+            setTimeout(() => tileAppear(tile_element), delay);
+            return stid;
+        }
+
+        function determineBorderRadii() {
+            for (var tile of Object.values(tiles)) {
+                // top-left, top-right, bottom-right, bottom-left
+                var el = tile.element;
+                var radius = tile_size/5;
+                var vert = [false, false];
+                var horiz = [false, false];
+                for (var stile of Object.values(tiles)) {
+                    if (stile.tid != tile.tid) {
+                        if (stile.position[1] == tile.position[1]) {
+                            if (stile.position[0] == tile.position[0] + tile_size) horiz[1] = true;
+                            else if (stile.position[0] == tile.position[0] - tile_size) horiz[0] = true;
+                        }
+                        else if (stile.position[0] == tile.position[0]) {
+                            if (stile.position[1] == tile.position[1] + tile_size) vert[1] = true;
+                            else if (stile.position[1] == tile.position[1] - tile_size) vert[0] = true;
+                        }
+                    }
+                }
+                var borders = [vert[0] || horiz[0], vert[0] || horiz[1], vert[1] || horiz[1], vert[1] || horiz[0]];
+                el.style.borderRadius = `${borders[0] ? 0 : radius}px ${borders[1] ? 0 : radius}px ${borders[2] ? 0 : radius}px ${borders[3] ? 0 : radius}px`;
+            }
+        }
+
+        const words = ["RAPID", "WITTY", "QUICK", "SUPER"]
+        var wd = 0;
+
+        function updateHeroWord() {
+            var pos = 0;
+            words[wd % words.length].split("").map((m, i) => {
+                setTimeout(() => {
+                    for (const stid of Object.keys(tiles)) {
+                        if (tiles[stid].position[0] == pos && tiles[stid].position[1] == 0) {
+                            gsap.to(tiles[stid].element, {
+                                duration: 0.2,
+                                scale: 0,
+                                overwrite: "auto"
+                            });
+                            setTimeout(() => {
+                                tiles[stid].element.remove();
+                                delete tiles[stid];
+                            }, 200);
+                        }
+                    }
+
+                    createTile(m, alphamap[m].value, [pos, 0], 100);
+                    pos += tile_size;
+                }, i*100)
+            })
+            const rect = document.getElementById("rapid-gap").getBoundingClientRect();
+            setGridPos([rect.x, rect.y - tile_size / 2], 0.5);
+            wd++;
+        }
+        
+        setInterval(updateHeroWord, 3000);
+        updateHeroWord();
+    </script>
+</body>
+
+</html>
