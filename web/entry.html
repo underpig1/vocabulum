@@ -111,6 +111,7 @@
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
+            z-index: 1;
         }
 
         h2 {
@@ -134,7 +135,7 @@
         .actions {
             position: absolute;
             display: flex;
-            top: 50px;
+            top: 35px;
             width: 50%;
             height: 80%;
             right: 0;
@@ -311,7 +312,7 @@
             }
         }
 
-        @media only screen and (max-width: 1100px), screen and (max-height: 900px) {
+        @media only screen and (max-width: 700px), screen and (max-height: 800px) { /* action font changes */
             .header {
                 font-size: 28pt;
                 margin-top: -12px;
@@ -332,7 +333,7 @@
             }
         }
 
-        @media only screen and (max-height: 800px) {
+        @media only screen and (max-height: 900px) {
             .actions {
                 top: 20px;
                 height: 80%;
@@ -393,61 +394,234 @@
             }
         }
 
+        .content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: block;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        body {
+            transition: opacity 0.3s ease;
+        }
+
+        body.active {
+            opacity: 0;
+        }
+
+        .content.active {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        .modal {
+            position: absolute;
+            top: 100px;
+            bottom: 50px;
+            left: 50px;
+            right: 50px;
+            padding: 50px;
+            transform: scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: block;
+            pointer-events: all;
+            opacity: 1;
+            transform: none;
+        }
+
+        .host-modal {
+            background-color: #ffd140c0;
+        }
+
+        .join-modal {
+            background-color: #ff2040c0;
+        }
+
+        .host-modal .header {
+            font-size: 128pt;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal .return {
+            position: absolute;
+            left: 30px;
+            top: 20px;
+            font-size: 48pt;
+            cursor: pointer;
+            width: 40px;
+            opacity: 0.5;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+        }
+
+        .modal .return .text-stroke {
+            stroke-width: 10px;
+        }
+
+        .modal .return:hover {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 100px;
+            height: 100px;
+            opacity: 1;
+            margin: 0;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-msg {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            transition-delay: 0.3s;
+            transition-behavior: ;
+            pointer-events: none;
+        }
+
+        .loading-msg h1 {
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            font-size: 24pt;
+            line-height: 0;
+        }
+
+        .host-modal.active .loading-msg {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .host-modal .loading-msg.loaded {
+            transform: scale(0.5);
+            opacity: 0;
+        }
     </style>
 </head>
 
 <body>
     <div id="background"></div>
-    <div id="tiles">
-        <div id="tile-shadow" class="tile"></div>
-    </div>
     <div class="nav">
-        <img src="icon.svg" style="width: 200px">
+        <image src="icon.svg" style="width: 200px"></image>
         <div class="links">
             <h2>more projects</h2>
         </div>
     </div>
-    <div class="hero">
-        <div class="hero-text">
-            <h1>the</h1>
-            <h1 id = "rapid-gap"></h1>
-            <h1>word game</h1>
+    <div class="content">
+        <div id="tiles">
+            <div id="tile-shadow" class="tile"></div>
+        </div>
+        <div class="hero">
+            <div class="hero-text">
+                <h1>the</h1>
+                <h1 id = "rapid-gap"></h1>
+                <h1>word game</h1>
+            </div>
+        </div>
+        <div class="mobile-hero">
+            <h1>the rapid word game</h1>
+        </div>
+        <div class="actions">
+            <div class="action classic" onclick="startClassic()">
+                <div class="action-bg"></div>
+                <div class="action-text">
+                    <svg class="header" viewBox="0 0 450 70">
+                        <text class="text-stroke" x="10" y="55">CLASSIC <tspan>&#62;</tspan></text>
+                    </svg>
+                    <p class="description">the classic single-player experience</p>
+                </div>
+            </div>
+            <div class="action host" onclick="startHost()">
+                <div class="action-bg"></div>
+                <div class="action-text">
+                    <svg class="header" viewBox="0 0 450 70">
+                        <text class="text-stroke" x="10" y="55">HOST <tspan>&#62;</tspan></text>
+                    </svg>
+                    <p class="description">start a new group game</p>
+                </div>
+            </div>
+            <div class="action join" onclick="startJoin()">
+                <div class="action-bg"></div>
+                <div class="action-text">
+                    <svg class="header" viewBox="0 0 450 70">
+                        <text class="text-stroke" x="10" y="55">JOIN <tspan>&#62;</tspan></text>
+                    </svg>
+                    <p class="description">join a group game</p>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="mobile-hero">
-        <h1>the rapid word game</h1>
+    <div class="host-modal modal">
+        <svg class="header return" viewBox="0 0 38 38" onclick="exitModal('host')">
+            <text class="text-stroke" x="2" y="42"><</text>
+        </svg>
+        <div class="loading-msg">
+            <image class="spinner" src="spinner.svg"></image>
+            <h1>creating your group</h1>
+        </div>
+        <svg class="header" viewBox="0 0 450 100">
+            <text class="text-stroke" x="10" y="75">1283</text>
+        </svg>
+        </div>
     </div>
-    <div class="actions">
-        <div class="action classic">
-            <div class="action-bg"></div>
-            <div class="action-text">
-                <svg class="header" viewBox="0 0 450 70">
-                    <text class="text-stroke" x="10" y="55">CLASSIC <tspan>&#62;</tspan></text>
-                </svg>
-                <p class="description">the classic single-player experience</p>
-            </div>
-        </div>
-        <div class="action host">
-            <div class="action-bg"></div>
-            <div class="action-text">
-                <svg class="header" viewBox="0 0 450 70">
-                    <text class="text-stroke" x="10" y="55">HOST <tspan>&#62;</tspan></text>
-                </svg>
-                <p class="description">start a new group game</p>
-            </div>
-        </div>
-        <div class="action join">
-            <div class="action-bg"></div>
-            <div class="action-text">
-                <svg class="header" viewBox="0 0 450 70">
-                    <text class="text-stroke" x="10" y="55">JOIN <tspan>&#62;</tspan></text>
-                </svg>
-                <p class="description">join a group game</p>
-            </div>
+    <div class="join-modal modal">
+        <svg class="header" viewBox="0 0 450 100">
+            <text class="text-stroke" x="10" y="75">1283</text>
+        </svg>
         </div>
     </div>
     <p class="version">version beta1</p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script>
+        function startHost() {
+            clearInterval(interval);
+            document.querySelector(".content").classList.add("active");
+            document.querySelector(".host-modal").classList.add("active");
+            document.querySelector(".host-modal .loading-msg").classList.remove("loaded");
+            setTimeout(createLobby, 1000);
+        }
+
+        function startJoin() {
+            clearInterval(interval);
+            document.querySelector(".content").classList.add("active");
+            document.querySelector(".join-modal").classList.add("active");
+        }
+
+        function exitModal(type) {
+            document.querySelector(".content").classList.remove("active");
+            document.querySelector(".host-modal").classList.remove("active");
+            document.querySelector(".join-modal").classList.remove("active");
+            deleteAllTiles();
+            setTimeout(resetTiles, 300);
+            if (type == "host") abandonLobby();
+        }
+
+        function onLobbyCreated() {
+            document.querySelector(".host-modal .loading-msg").classList.add("loaded");
+        }
+    </script>
     <script>
         var target, target_initial_position, contested_tile_position, tile_is_contested, exiled_tile;
 
@@ -468,14 +642,17 @@
         var anchor_pos = [window.innerWidth/2, window.innerHeight/2];
         setGridPos(anchor_pos);
 
-        window.onresize = (e) => {
-            if (window.innerWidth <= 1600) tile_size = 75;
-            else tile_size = 100;
-
+        function deleteAllTiles() {
             for (const stid of Object.keys(tiles)) {
                 tiles[stid].element.remove();
                 delete tiles[stid];
             }
+        }
+
+        window.onresize = (e) => {
+            if (window.innerWidth <= 1600) tile_size = 75;
+            else tile_size = 100;
+            deleteAllTiles();
         }
         window.onresize();
 
@@ -483,13 +660,12 @@
             var timer;
             return () => {
                 if (timer) clearTimeout(timer);
-                timer = setTimeout(updateHeroWord, 100);
+                timer = setTimeout(resetTiles, 100);
             };
         }
 
         window.addEventListener("resize", debounce());
-
-        
+  
         const alphamap = {
             " ": { draws: 2, value: 0 },
             "A": { draws: 9, value: 1 },
@@ -763,9 +939,90 @@
             setGridPos([rect.x, rect.y - tile_size / 2], 0.5);
             wd++;
         }
-        
-        setInterval(updateHeroWord, 3000);
+
+        var interval = setInterval(updateHeroWord, 3000);
         updateHeroWord();
+
+        function resetTiles() {
+            clearInterval(interval);
+            deleteAllTiles();
+            interval = setInterval(updateHeroWord, 3000);
+            updateHeroWord();
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const config = {
+        }
+        const app = firebase.initializeApp(config);
+        const database = firebase.database();
+
+        const expiry_time = 24*60*60*1000;
+        
+        var my_lobby = 0;
+
+        function createLobbyCode() {
+            var code = ""
+            const alphabet = "123456789ABCDEFGHJKMNPQRSTUVWXYZ".split("");
+            for (var i = 0; i < 4; i++) {
+                code += alphabet[Math.floor(Math.random()*alphabet.length)];
+            }
+            return code;
+        }
+
+        function collectOldLobbies(lobbies) {
+            for (const lobby_id of Object.keys(lobbies)) {
+                const lobby = lobbies[lobby_id];
+                if (!lobby.hasOwnProperty("users") || lobby.users == []) {
+                    firebase.database().ref("lobbies/" + lobby_id).remove();
+                    continue;
+                }
+                if (lobby.date) {
+                    const time_difference = new Date() - new Date(lobby.date);
+                    if (time_difference > expiry_time) {
+                        firebase.database().ref("lobbies/" + lobby_id).remove();
+                        continue;
+                    }
+                }
+                else firebase.database().ref("lobbies/" + lobby_id).remove();
+            }
+        }
+
+        function createLobby() {
+            function createLobbyData(lobby_id) {
+                my_lobby = lobby_id;
+                console.log(my_lobby);
+                firebase.database().ref("lobbies/" + lobby_id).set({
+                    date: new Date().toISOString(),
+                    users: ["host"]
+                });
+                onLobbyCreated();
+            }
+            firebase.database().ref("lobbies").once("value").then((snapshot) => {
+                const lobbies = snapshot.val();
+                if (lobbies) {
+                    collectOldLobbies(lobbies);
+                    var recursions = 0;
+                    function tryCreateLobbyCode() {
+                        if (recursions++ > 5) return 0;
+                        var try_lobby_id = createLobbyCode();
+                        for (const lobby_id of Object.keys(lobbies)) {
+                            if (try_lobby_id == lobby_id) {
+                                return tryCreateLobbyCode();
+                            }
+                        }
+                        return createLobbyData(try_lobby_id);
+                    }
+                    tryCreateLobbyCode();
+                }
+                else createLobbyData(createLobbyCode());
+            });
+        }
+
+        function abandonLobby() {
+            if (my_lobby != 0) firebase.database().ref("lobbies/" + my_lobby).remove();
+        }
     </script>
 </body>
 
