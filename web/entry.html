@@ -192,7 +192,7 @@
         }
 
         .action.join {
-            background-color: #ff2040c0;
+            background-color: #ff4050c0; /* old red: #ff2040c0 */
             --width: 95%;
             width: var(--width);
         }
@@ -261,6 +261,12 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+        }
+
+        h1 {
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 700;
+            font-size: 80pt;
         }
 
         .hero h1, .mobile-hero h1 {
@@ -439,14 +445,11 @@
 
         .host-modal {
             background-color: #ffd140c0;
+            clip-path: inset(0);
         }
 
         .join-modal {
-            background-color: #ff2040c0;
-        }
-
-        .host-modal .header {
-            font-size: 128pt;
+            background-color: #ff4050c0;
         }
 
         @keyframes spin {
@@ -460,21 +463,21 @@
 
         .modal .return {
             position: absolute;
-            left: 30px;
-            top: 20px;
+            left: 50px;
+            top: 35px;
             font-size: 48pt;
             cursor: pointer;
-            width: 40px;
+            width: 45px;
             opacity: 0.5;
             transition: transform 0.1s ease, opacity 0.1s ease;
         }
 
         .modal .return .text-stroke {
-            stroke-width: 10px;
+            stroke-width: 16px;
         }
 
         .modal .return:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
             opacity: 1;
         }
 
@@ -517,6 +520,326 @@
         .host-modal .loading-msg.loaded {
             transform: scale(0.5);
             opacity: 0;
+        }
+
+        .group-code {
+            font-size: 128pt;
+            width: 400px;
+            height: auto;
+        }
+
+        .group-code .text-stroke {
+            stroke-width: 30px;
+        }
+
+        .host-modal-content {
+            position: absolute;
+            display: flex;
+            top: 125px;
+            bottom: 50px;
+            left: 50px;
+            right: 50px;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .host-modal-content.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .group-options {
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .group-members {
+            flex-grow: 1;
+        }
+
+        .code-header {
+            font-size: 24pt;
+            font-weight: 600;
+            margin-top: -15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 400px;
+            height: 65px;
+            font-size: 14pt;
+            outline: none;
+            border: 4px black solid;
+            padding: 0 15px;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            filter: drop-shadow(0 5px 0 black);
+            color: #000000aa;
+            margin-right: auto;
+            border-radius: 0;
+        }
+
+        .checkbox {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: max-content;
+            height: 50px;
+            max-width: 400px;
+            margin: 25px 0;
+            font-size: 16pt;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .checkbox input {
+            opacity: 0;
+            cursor: pointer;
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            z-index: 1;
+        }
+
+        .checkbox span {
+            display: block;
+            width: 35px;
+            height: 35px;
+            border-radius: 0;
+            background-color: white;
+            border: 4px black solid;
+            filter: drop-shadow(0 5px 0 black);
+            transition: background-color 0.1s ease, transform 0.05s linear, filter 0.05s linear;
+            margin-right: 20px;
+        }
+
+        .checkbox input:checked ~ span {
+            background-color: black;
+        }
+
+        .checkbox:active span {
+            transform: translateY(4px);
+            filter: drop-shadow(0 1px 0 black);
+        }
+
+        .ready {
+            position: absolute;
+            width: 230px;
+            bottom: 0;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .ready:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-background {
+            position: absolute;
+            left: -50px;
+            top: -150px;
+            right: -350px;
+            bottom: -350px;
+            background-image: url(skew_background.png);
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            transform: rotate(10deg);
+            transition: right 0.5s ease, bottom 0.5s ease, transform 0.5s ease;
+        }
+
+        .host-modal-content.active .modal-background {
+            right: -50px;
+            bottom: -50px;
+            transform: none;
+        }
+
+        .join-modal-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-items: center;
+            align-content: center;
+            justify-content: center;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        label {
+            font-size: 16pt;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+        }
+
+        .join-modal .ready {
+            position: unset;
+        }
+
+        .join-modal.active .join-modal-content.active {
+            transform: scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .join-modal.active .join-modal-content:not(.active) {
+            transform: none;
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .join-modal-content-2 {
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-items: center;
+            align-content: center;
+            justify-content: center;
+            position: absolute;
+            left: 50px;
+            top: 125px;
+            right: 50px;
+            bottom: 50px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .join-modal-content-2.active {
+            transform: none;
+            pointer-events: all;
+            opacity: 1;
+        }
+
+        .join-modal .loading-msg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition-delay: 0s;
+        }
+
+        .join-modal .loading-msg.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .join-modal input[type="text"] {
+            margin-right: 0;
+        }
+
+        #join-code {
+            text-align: center;
+            width: 400px;
+            height: 100px;
+            font-size: 32pt;
+            font-weight: 600;
+            background-color: white;
+            color: black;
+            letter-spacing: 4px;
+            border-width: 5px;
+            outline: none;
+            border-radius: 15px;
+        }
+
+        ::placeholder {
+            color: gray;
+            opacity: 1;
+        }
+
+        .alert {
+            position: absolute;
+            width: 400px;
+            height: 200px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ff6f7b;
+            opacity: 0;
+            padding: 25px 55px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 15px 5px #00000022;
+            pointer-events: none;
+            clip-path: inset(0);
+        }
+
+        .alert.active {
+            animation: pulse-alert 2.5s ease;
+        }
+
+        .alert .header {
+            width: 230px;
+        }
+
+        .alert h1 {
+            font-size: 16pt;
+            font-weight: 500;
+        }
+
+        @keyframes show-alert {
+            0% {
+                height: 0;
+            }
+            100% {
+                height: 100%;
+            }
+        }
+
+        @keyframes pulse-alert {
+            0% {
+                transform: translate(-50%, -30%);
+                opacity: 0;
+            }
+            20% {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            80% {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -30%);
+                opacity: 0;
+            }
+        }
+
+        .alert span {
+            display: block;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background-color: #cfcfcfaa;
+            z-index: -1;
+        }
+
+        .alert.active span {
+            animation: show-alert 2s linear;
+        }
+
+        #member-count {
+            color: #555555;
+        }
+
+        #member-count::before {
+            content: "";
+            background-image: url(member.png);
+            display: inline-block;
+            width: 15px;
+            height: 16px;
+            margin-right: 10px;
+            background-size: cover;
+            background-repeat: no-repeat;
         }
     </style>
 </head>
@@ -574,32 +897,82 @@
         </div>
     </div>
     <div class="host-modal modal">
-        <svg class="header return" viewBox="0 0 38 38" onclick="exitModal('host')">
-            <text class="text-stroke" x="2" y="42"><</text>
+        <svg class="header return" viewBox="0 0 45 42" onclick="exitModal('host')">
+            <text class="text-stroke" x="5" y="42"><</text>
         </svg>
-        <div class="loading-msg">
-            <image class="spinner" src="spinner.svg"></image>
+        <div class="loading-msg loaded">
+            <image class="spinner" src="spinner.png"></image>
             <h1>creating your group</h1>
         </div>
-        <svg class="header" viewBox="0 0 450 100">
-            <text class="text-stroke" x="10" y="75">1283</text>
-        </svg>
+        <div class="host-modal-content">
+            <div class="modal-background"></div>
+            <div class="group-options">
+                <svg class="header group-code" viewBox="0 0 500 200">
+                    <text class="text-stroke" x="10" y="150" id="group-code">1283</text>
+                </svg>
+                <h1 class="code-header">is your group code</h1>
+                <label for="host-name" style="margin-bottom: -10px; margin-top: 10px;">give yourself a name:</label>
+                <input type="text" style="margin-top: 20px" placeholder="Group host" id="host-name" onchange="updateHostName(event)" />
+                <label class="checkbox">
+                    <input type="checkbox" id="host-private" onchange="updateGroupPrivacy(event)" />
+                    <span></span>
+                    <p>private group</p>
+                </label>
+                <label id="member-count">1 member</label>
+                <svg class="header ready" viewBox="0 0 232 70">
+                    <text class="text-stroke" x="10" y="55">READY <tspan>&#62;</tspan></text>
+                </svg>
+            </div>
+            <div class="group-members">
+            </div>
         </div>
     </div>
     <div class="join-modal modal">
-        <svg class="header" viewBox="0 0 450 100">
-            <text class="text-stroke" x="10" y="75">1283</text>
+        <svg class="header return" viewBox="0 0 45 42" onclick="exitModal('join')">
+            <text class="text-stroke" x="5" y="42"><</text>
         </svg>
+        <div class="join-modal-content">
+            <label for="join-name" style="margin-top: auto;">give yourself a nickname:</label>
+            <input type="text" style="margin-top: 20px" placeholder="Player 1" id="join-name" oninput="updateJoinName(event)" />
+            <svg class="header ready" style="margin-top: auto;" viewBox="0 0 190 70">
+                <text class="text-stroke" x="10" y="55" id="next" onclick="nextJoinContent()">NEXT <tspan>&#62;</tspan></text>
+            </svg>
         </div>
+        <div class="join-modal-content-2">
+            <label for="join-name">enter group code:</label>
+            <input type="text" style="margin-top: 15px" placeholder="0000" oninput="updateJoinCode(event)" id="join-code" />
+            <svg class="header ready" style="margin-top: 25px;" viewBox="0 0 180 70">
+                <text class="text-stroke" x="10" y="55" id="join" onclick="startJoinFromCode(false)">JOIN <tspan>&#62;</tspan></text>
+            </svg>
+            <label style="margin-top: 80px;">or join a random game:</label>
+            <svg class="header ready" viewBox="0 0 260 70">
+                <text class="text-stroke" x="10" y="55" onclick="startJoinFromCode(true)">MATCH <tspan>&#62;</tspan></text>
+            </svg>
+        </div>
+        <div class="loading-msg">
+            <image class="spinner" src="spinner.png"></image>
+            <h1>connecting...</h1>
+        </div>
+    </div>
+    <div class="alert">
+        <span></span>
+        <svg class="header" viewBox="0 0 230 70">
+            <text class="text-stroke" x="10" y="55">UH OH...</text>
+        </svg>
+        <h1 id="alert-text">Couldn't find a valid lobby</h1>
     </div>
     <p class="version">version beta1</p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
+        var join_code_valid = false;
+
         function startHost() {
             clearInterval(interval);
             document.querySelector(".content").classList.add("active");
             document.querySelector(".host-modal").classList.add("active");
             document.querySelector(".host-modal .loading-msg").classList.remove("loaded");
+            document.querySelector(".host-modal .host-modal-content").classList.remove("active");
+            document.querySelector(".host-modal .host-modal-content").style.display = "none";
             setTimeout(createLobby, 1000);
         }
 
@@ -607,6 +980,14 @@
             clearInterval(interval);
             document.querySelector(".content").classList.add("active");
             document.querySelector(".join-modal").classList.add("active");
+            document.querySelector(".join-modal-content").classList.remove("active");
+            document.querySelector(".join-modal-content-2").classList.remove("active");
+            document.querySelector(".join-modal .loading-msg").classList.remove("active");
+            my_name = createUsername();
+            document.getElementById("join-name").value = my_name;
+            document.getElementById("join-code").value = "";
+            document.getElementById("join").style.opacity = 0.5;
+            console.log("set opacity");
         }
 
         function exitModal(type) {
@@ -616,10 +997,66 @@
             deleteAllTiles();
             setTimeout(resetTiles, 300);
             if (type == "host") abandonLobby();
+            if (type == "join") setTimeout(() => {
+                document.querySelector(".join-modal-content").classList.remove("active");
+                document.querySelector(".join-modal-content-2").classList.remove("active");
+                document.querySelector(".join-modal .loading-msg").classList.remove("active");
+            }, 300);
         }
 
         function onLobbyCreated() {
             document.querySelector(".host-modal .loading-msg").classList.add("loaded");
+            document.querySelector(".host-modal .host-modal-content").style.display = "flex";
+            document.getElementById("group-code").textContent = my_lobby;
+            my_name = createUsername();
+            document.getElementById("host-name").value = my_name;
+            setTimeout(() => document.querySelector(".host-modal .host-modal-content").classList.add("active"), 500);
+        }
+
+        function nextJoinContent() {
+            if (my_name != "") {
+                document.querySelector(".join-modal-content").classList.add("active");
+                document.querySelector(".join-modal-content-2").classList.add("active");
+            }
+        }
+
+        function updateHostName(e) {
+            my_name = e.target.value;
+        }
+
+        function updateJoinName(e) {
+            my_name = e.target.value;
+            document.getElementById("next").style.opacity = (my_name == "" ? 0.5 : 1);
+        }
+
+        function updateJoinCode(e) {
+            const code = e.target.value;
+            join_code_valid = /^[0-9][0-9][0-9][0-9]$/.test(code);
+            document.getElementById("join").style.opacity = join_code_valid ? 1 : 0.5;
+        }
+
+        function startJoinFromCode(match = false) {
+            if ((!match && join_code_valid) || match) {
+                document.querySelector(".join-modal-content-2").classList.remove("active");
+                document.querySelector(".join-modal .loading-msg").classList.add("active");
+                if (!match) {
+                    const code = document.getElementById("join-code").value;
+                    joinFromCode(code);
+                }
+                else joinFromMatch();
+            }
+        }
+
+        function triggerAlert(content) {
+            exitModal("host");
+            exitModal("join");
+            document.querySelector(".alert").classList.remove("active");
+            document.getElementById("alert-text").innerText = content;
+            setTimeout(() => document.querySelector(".alert").classList.add("active"), 10);
+        }
+
+        function onJoinConnect() {
+            document.querySelector(".join-modal .loading-msg").classList.remove("active");
         }
     </script>
     <script>
@@ -954,21 +1391,72 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
         const config = {
+            apiKey: "AIzaSyCYiF56kcc8XriibM-KGFcGfhfYYtvyQ1s",
+            authDomain: "vocabulum-220c3.firebaseapp.com",
+            projectId: "vocabulum-220c3",
+            storageBucket: "vocabulum-220c3.firebasestorage.app",
+            messagingSenderId: "143266091587",
+            appId: "1:143266091587:web:aa07a256380819be63faf6",
+            measurementId: "G-5SFXW24TDN"
         }
         const app = firebase.initializeApp(config);
         const database = firebase.database();
 
-        const expiry_time = 24*60*60*1000;
+        const expiry_time = 24*60*60*1000; // time before a lobby is permanently deleted
+        const shadow_expiry_time = 10*60*1000; // time before a lobby becomes unseen in matchmaking, to avoid inactive lobbies
+        
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
         
         var my_lobby = 0;
+        var my_name = "";
+
+        function createUsername() {
+            const adjectives = ["Quick", "Cool", "Fast", "Speedy", "Witty", "Smart", "Awesome", "Chill", "Super", "Typical", "Average", "Intelligent", "Unknown", "Famous"];
+            const nouns = ["Rabbit", "Monkey", "Puppy", "Cat", "Donkey", "Dog", "Hare", "Tortoise", "Turtle", "Frog", "Toad", "Slug", "Bear"];
+            const nums = "12345789".split("");
+            return pick(adjectives) + pick(nouns) + pick(nums) + pick(nums);
+        }
 
         function createLobbyCode() {
             var code = ""
-            const alphabet = "123456789ABCDEFGHJKMNPQRSTUVWXYZ".split("");
-            for (var i = 0; i < 4; i++) {
-                code += alphabet[Math.floor(Math.random()*alphabet.length)];
-            }
+            const alphabet = "123456789".split("");
+            for (var i = 0; i < 4; i++) code += pick(alphabet);
             return code;
+        }
+
+        function findMatchedLobbyCode() {
+            const start_search_time = new Date();
+            var attempts = 0;
+            return new Promise((resolve, reject) => {
+                const search = () => firebase.database().ref("lobbies").once("value").then((snapshot) => {
+                    const lobbies = snapshot.val();
+                    if (attempts == 0) collectOldLobbies(lobbies);
+                    const available_lobbies = [];
+                    if (lobbies) {
+                        for (const lobby_id of Object.keys(lobbies)) {
+                            const lobby = lobbies[lobby_id];
+                            if (!lobby.private && !lobby.locked) {
+                                const time_difference = new Date() - new Date(lobby.date);
+                                if (time_difference < shadow_expiry_time) available_lobbies.push(lobby_id);
+                            }
+                        }
+                    }
+                    attempts++
+                    if (available_lobbies.length == 0) {
+                        if (new Date() - start_search_time < 5*60*1000) { // give up after 5 mins
+                            setTimeout(() => {
+                                search();
+                            }, 10000) // refresh every 10 seconds
+                        }
+                        else triggerAlert("couldn't find a match!")
+                    }
+                    else resolve(pick(available_lobbies));
+                });
+            });
+        }
+
+        function joinLobbyByCode(code) {
+
         }
 
         function collectOldLobbies(lobbies) {
@@ -1022,6 +1510,10 @@
 
         function abandonLobby() {
             if (my_lobby != 0) firebase.database().ref("lobbies/" + my_lobby).remove();
+        }
+
+        function updateGroupPrivacy(e) {
+            if (my_lobby) firebase.database().ref("lobbies/" + my_lobby + "/private").set(e.target.checked);
         }
     </script>
 </body>
