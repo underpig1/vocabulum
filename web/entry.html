@@ -101,6 +101,10 @@
         }
     </style>
     <style>
+        :root {
+            --box-radius: 10px;
+        }
+
         .nav {
             position: absolute;
             width: 100%;
@@ -319,7 +323,7 @@
         }
 
         @media only screen and (max-width: 700px), screen and (max-height: 800px) { /* action font changes */
-            .header {
+            .action .header {
                 font-size: 28pt;
                 margin-top: -12px;
                 margin-left: -8px;
@@ -329,7 +333,7 @@
                 margin-left: 0;
             }
 
-            .text-stroke {
+            .action .text-stroke {
                 stroke-width: 10px;
             }
 
@@ -367,15 +371,6 @@
                 display: flex;
             } */
 
-            .nav .links {
-                position: fixed;
-                width: 100%;
-                bottom: 15px;
-                left: 35px;
-                line-height: 0;
-                opacity: 0.5;
-            }
-
             .version {
                 display: none;
             }
@@ -385,7 +380,7 @@
             }
         }
 
-        @media only screen and (max-width: 400px) {
+        @media only screen and (max-width: 500px) {
             .actions {
                 width: 100%;
             }
@@ -397,6 +392,23 @@
 
             .mobile-hero h1 {
                 font-size: 16pt;
+            }
+
+            .icon {
+                position: absolute;
+                left: 0;
+                right: 0;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .nav .links {
+                position: fixed;
+                width: 100%;
+                bottom: 15px;
+                left: 35px;
+                line-height: 0;
+                opacity: 0.5;
             }
         }
 
@@ -434,6 +446,7 @@
             opacity: 0;
             pointer-events: none;
             transition: transform 0.3s ease, opacity 0.3s ease;
+            clip-path: inset(0);
         }
 
         .modal.active {
@@ -445,7 +458,6 @@
 
         .host-modal {
             background-color: #ffd140c0;
-            clip-path: inset(0);
         }
 
         .join-modal {
@@ -501,7 +513,6 @@
             transform: scale(0.5);
             transition: transform 0.5s ease, opacity 0.5s ease;
             transition-delay: 0.3s;
-            transition-behavior: ;
             pointer-events: none;
         }
 
@@ -550,13 +561,18 @@
         }
 
         .group-options {
-            width: 35%;
+            width: 100%;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
         }
 
         .group-members {
+            position: relative;
+            display: flex;
+            flex-direction: column;
             flex-grow: 1;
+            margin-left: 50px;
         }
 
         .code-header {
@@ -578,7 +594,7 @@
             filter: drop-shadow(0 5px 0 black);
             color: #000000aa;
             margin-right: auto;
-            border-radius: 0;
+            border-radius: var(--box-radius);
         }
 
         .checkbox {
@@ -608,7 +624,7 @@
             display: block;
             width: 35px;
             height: 35px;
-            border-radius: 0;
+            border-radius: var(--box-radius);
             background-color: white;
             border: 4px black solid;
             filter: drop-shadow(0 5px 0 black);
@@ -649,9 +665,10 @@
             pointer-events: none;
             transform: rotate(10deg);
             transition: right 0.5s ease, bottom 0.5s ease, transform 0.5s ease;
+            z-index: -1;
         }
 
-        .host-modal-content.active .modal-background {
+        .host-modal-content.active .modal-background, .join-modal-content-3.active .modal-background {
             right: -50px;
             bottom: -50px;
             transform: none;
@@ -734,6 +751,7 @@
 
         #join-code {
             text-align: center;
+            max-width: 100%;
             width: 400px;
             height: 100px;
             font-size: 32pt;
@@ -841,13 +859,203 @@
             background-size: cover;
             background-repeat: no-repeat;
         }
+
+        .member-grid {
+            width: 100%;
+            padding-right: 25px;
+            overflow-y: auto;
+            margin-bottom: auto;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Dynamic columns */
+            column-gap: 16px;
+            row-gap: 20px;
+        }
+
+        .member {
+            width: 100%;
+            height: 65px;
+            max-width: 400px;
+            font-size: 14pt;
+            outline: none;
+            border: 4px black solid;
+            padding: 0 15px;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            filter: drop-shadow(0 5px 0 black);
+            background-color: #eecc67ff;
+            color: black;
+            border-radius: var(--box-radius);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .member-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .member-remove {
+            width: 22px;
+            opacity: 0.5;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+            cursor: pointer;
+        }
+
+        .member-remove:hover {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .join-modal-content-3 {
+            position: absolute;
+            left: 50px;
+            top: 125px;
+            right: 50px;
+            bottom: 50px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            pointer-events: none;
+            display: flex;
+        }
+
+        .join-modal-content-3.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .join-modal .member {
+            background-color: #ee6772;
+        }
+
+        .join-modal .group-options {
+            max-width: 350px;
+        }
+
+        .waiting-msg {
+            animation: waiting 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes waiting {
+            0% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @media only screen and (max-width: 1200px), only screen and (max-height: 800px) {
+            .modal {
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                top: 15px;
+                z-index: 2;
+            }
+
+            body:has(.modal.active) .nav {
+                opacity: 0.2;
+            }
+
+            .group-code {
+                font-size: 92pt;
+                margin-top: -45px;
+            }
+
+            .modal h1 {
+                font-size: 16pt;
+            }
+
+            .modal label {
+                font-size: 12pt;
+            }
+
+            input[type="text"] {
+                font-size: 12pt;
+                height: 55px;
+            }
+
+            .host-modal-content, .join-modal-content-3 {
+                left: 25px;
+                right: 25px;
+                bottom: 25px;
+            }
+
+            .return {
+                left: 25px !important;
+                top: 25px !important;
+            }
+
+            .group-options {
+                max-width: 300px;
+            }
+
+            .join-modal .group-options {
+                max-width: 240px;
+            }
+        }
+
+        @media only screen and (max-width: 700px), only screen and (max-height: 400px) { /* size adjustments */
+            .group-code { /* font */
+                font-size: 52pt;
+                margin-top: -85px;
+                margin-bottom: -10px;
+                pointer-events: none;
+            }
+
+            .group-code .text-stroke { /* font */
+                stroke-width: 20px;
+            }
+
+            .member-grid { /* font */
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .member { /* font */
+                font-size: 12pt;
+                height: 55px;
+            }
+
+            .group-options .checkbox { /* font */
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media only screen and (max-width: 700px) {  /* mobile adjustments */
+            .host-modal-content, .join-modal-content-3 { /* mobile */
+                padding-bottom: 80px;
+                flex-direction: column;
+                align-content: center;
+            }
+
+            .group-options { /* mobile */
+                min-width: 100% !important;
+            }
+
+            .group-members { /* mobile */
+                flex: 1;
+                margin: 0;
+                min-height: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div id="background"></div>
     <div class="nav">
-        <image src="icon.svg" style="width: 200px"></image>
+        <image class="icon" src="icon.svg" style="width: 200px"></image>
         <div class="links">
             <h2>more projects</h2>
         </div>
@@ -918,12 +1126,35 @@
                     <span></span>
                     <p>private group</p>
                 </label>
-                <label id="member-count">1 member</label>
                 <svg class="header ready" viewBox="0 0 232 70">
                     <text class="text-stroke" x="10" y="55">READY <tspan>&#62;</tspan></text>
                 </svg>
             </div>
             <div class="group-members">
+                <label id="member-count">1 member</label>
+                <label class="waiting-msg" style="position: absolute; left: 0; right: 0; width: max-content; top: 0; bottom: 0; margin: auto; height: max-content;">waiting for players to join...</label>
+                <div class="member-grid">
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy21</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -952,6 +1183,41 @@
         <div class="loading-msg">
             <image class="spinner" src="spinner.png"></image>
             <h1>connecting...</h1>
+        </div>
+        <div class="join-modal-content-3">
+            <div class="modal-background"></div>
+            <div class="group-options">
+                <svg class="header group-code" viewBox="0 0 500 200">
+                    <text class="text-stroke" x="10" y="150" id="group-code">1283</text>
+                </svg>
+                <h1 class="code-header">is your group code</h1>
+                <label class="waiting-msg" style="position: absolute; bottom: 0;">waiting for the host...</label>
+            </div>
+            <div class="group-members">
+                <label id="member-count">1 member</label>
+                <div class="member-grid">
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy21</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                    <div class="member">
+                        <p class="member-name">SpaceCowboy22</p>
+                        <img class="member-remove" src="x.png"></img>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="alert">
@@ -982,6 +1248,7 @@
             document.querySelector(".join-modal").classList.add("active");
             document.querySelector(".join-modal-content").classList.remove("active");
             document.querySelector(".join-modal-content-2").classList.remove("active");
+            document.querySelector(".join-modal-content-3").classList.remove("active");
             document.querySelector(".join-modal .loading-msg").classList.remove("active");
             my_name = createUsername();
             document.getElementById("join-name").value = my_name;
@@ -1000,6 +1267,7 @@
             if (type == "join") setTimeout(() => {
                 document.querySelector(".join-modal-content").classList.remove("active");
                 document.querySelector(".join-modal-content-2").classList.remove("active");
+                document.querySelector(".join-modal-content-3").classList.remove("active");
                 document.querySelector(".join-modal .loading-msg").classList.remove("active");
             }, 300);
         }
@@ -1018,6 +1286,13 @@
                 document.querySelector(".join-modal-content").classList.add("active");
                 document.querySelector(".join-modal-content-2").classList.add("active");
             }
+        }
+
+        function showJoinLobby() {
+            document.querySelector(".join-modal-content").classList.add("active");
+            document.querySelector(".join-modal-content-2").classList.remove("active");
+            setTimeout(() => document.querySelector(".join-modal-content-3").classList.add("active"), 200);
+            document.querySelector(".join-modal .loading-msg").classList.remove("active");
         }
 
         function updateHostName(e) {
