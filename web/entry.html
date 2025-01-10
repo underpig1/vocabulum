@@ -573,6 +573,7 @@
             flex-direction: column;
             flex-grow: 1;
             margin-left: 50px;
+            min-width: 0;
         }
 
         .code-header {
@@ -864,6 +865,7 @@
             width: 100%;
             padding-right: 25px;
             overflow-y: auto;
+            overflow-x: hidden;
             margin-bottom: auto;
             padding-bottom: 5px;
             margin-top: 20px;
@@ -871,6 +873,7 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Dynamic columns */
             column-gap: 16px;
             row-gap: 20px;
+            min-width: 0;
         }
 
         .member {
@@ -1077,6 +1080,21 @@
                 min-height: 0;
             }
         }
+
+        .member-grid:has(> :last-child:nth-child(2)) { /* if it only has two elements */
+            width: 100%;
+            max-width: 800px;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 3;
+            display: none;
+        }
     </style>
 </head>
 
@@ -1154,7 +1172,7 @@
                     <span></span>
                     <p>private group</p>
                 </label>
-                <svg class="header ready" viewBox="0 0 232 70">
+                <svg class="header ready" viewBox="0 0 232 70" onclick="startHostGame()">
                     <text class="text-stroke" x="10" y="55">READY <tspan>&#62;</tspan></text>
                 </svg>
             </div>
@@ -1255,14 +1273,80 @@
         </svg>
         <h1 id="alert-text">Couldn't find a valid lobby</h1>
     </div>
+    <canvas id="overlay"></canvas>
     <p class="version">version beta1</p>
+    <script>
+        const canvas = document.getElementById("overlay");
+        const ctx = canvas.getContext("2d");
+
+        const set_canvas_size = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        document.addEventListener("resize", set_canvas_size);
+        const rrange = (a, b) => Math.random()*(b - a) + a
+        const slicel = (a, b, size, i) => [Math.max(a, a + (b-a)*i - size/2), Math.min(a + (b-a)*i + size/2, b)];
+        set_canvas_size();
+
+        function startOverlayAnimation() {
+            var rects = [];
+            const max_time = 2000;
+            const max_delay = 500;
+            const rect_count = 100;
+            const size_range = [50, 500];
+            const delay_range = [0, 100];
+            const min_speed = 0.8;
+            const max_speed = 3;
+            for (var i = 0; i < rect_count; i++) {
+                const delay = rrange(...slicel(...delay_range, 40, i / rect_count));
+                setTimeout(((i) => {
+                    const scale = rrange(...slicel(...size_range, 20, i / rect_count));
+                    // const min_speed = (canvas.height + scale)/(max_time - delay);
+                    rects.push({
+                        pos: [Math.random() * canvas.width, -scale],
+                        scale: scale,
+                        rot: rrange(0, Math.PI / 2),
+                        spd: rrange(min_speed, Math.min(min_speed + size_range[1] / scale * 0.5, max_speed)),
+                        rot_spd: rrange(-Math.PI / 1000, Math.PI / 1000)
+                    })
+                }).bind(null, i), delay);
+            }
+
+            var prev_t = 0;
+            var full_pos = -500;
+            const full_spd = 2;
+            function drawOverlay() {
+                const dt = prev_t == 0 ? 0 : performance.now() - prev_t;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (const rect of rects) {
+                    ctx.save();
+                    ctx.translate(rect.pos[0], rect.pos[1]);
+                    ctx.rotate(rect.rot);
+                    ctx.fillStyle = "black";
+                    ctx.fillRect(-rect.scale / 2, -rect.scale / 2, rect.scale, rect.scale);
+                    ctx.restore();
+
+                    rect.pos[1] += rect.spd * dt;
+                    rect.rot += rect.rot_spd * dt;
+                }
+                ctx.fillRect(0, 0, canvas.width, full_pos);
+                full_pos += full_spd * dt;
+                prev_t = performance.now();
+                requestAnimationFrame(drawOverlay);
+            }
+
+            drawOverlay();
+        }
+
+        function redirect() {
+            document.getElementById("overlay").style.display = "block";
+            startOverlayAnimation();
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
         var join_code_valid = false;
-
-        function redirect() {
-            
-        }
 
         function startHost() {
             clearInterval(interval);
@@ -1931,6 +2015,12 @@
 
         function updateGroupPrivacy(e) {
             if (my_lobby) firebase.database().ref("lobbies/" + my_lobby + "/private").set(e.target.checked);
+        }
+
+        function startHostGame() {
+            firebase.database().ref("lobbies/" + my_lobby + "/start").set(true);
+            firebase.database().ref("lobbies/" + my_lobby + "/locked").set(true);
+            redirect();
         }
     </script>
 </body>
