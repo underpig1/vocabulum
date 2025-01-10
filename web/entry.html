@@ -712,7 +712,7 @@
             pointer-events: none;
             display: flex;
             flex-direction: column;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             align-items: center;
             align-content: center;
             justify-content: center;
@@ -813,7 +813,7 @@
 
         @keyframes pulse-alert {
             0% {
-                transform: translate(-50%, -30%);
+                transform: translate(-50%, -50%) scale(0.8);
                 opacity: 0;
             }
             20% {
@@ -825,7 +825,7 @@
                 opacity: 1;
             }
             100% {
-                transform: translate(-50%, -30%);
+                transform: translate(-50%, -50%) scale(0.8);
                 opacity: 0;
             }
         }
@@ -845,11 +845,11 @@
             animation: show-alert 2s linear;
         }
 
-        #member-count {
+        .member-count {
             color: #555555;
         }
 
-        #member-count::before {
+        .member-count::before {
             content: "";
             background-image: url(member.png);
             display: inline-block;
@@ -866,7 +866,7 @@
             overflow-y: auto;
             margin-bottom: auto;
             padding-bottom: 5px;
-            margin-top: 25px;
+            margin-top: 20px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Dynamic columns */
             column-gap: 16px;
@@ -934,12 +934,21 @@
             background-color: #ee6772;
         }
 
-        .join-modal .group-options {
+        /* .join-modal .group-options {
             max-width: 350px;
-        }
+        } */
 
         .waiting-msg {
             animation: waiting 1s ease-in-out infinite alternate;
+            display: none;
+        }
+
+        .waiting-msg.active {
+            display: block;
+        }
+
+        body:has(.modal.active) .version {
+            display: none;
         }
 
         @keyframes waiting {
@@ -1002,9 +1011,28 @@
             .join-modal .group-options {
                 max-width: 240px;
             }
+
+            .spinner {
+                width: 75px;
+                height: 75px;
+            }
+
+            .member-grid {
+                margin-top: 15px;
+            }
         }
 
-        @media only screen and (max-width: 700px), only screen and (max-height: 400px) { /* size adjustments */
+        @media only screen and (max-height: 700px) {
+            .join-modal-content-2 {
+                margin-top: -100px;
+            }
+
+            .join-modal-content-2 label {
+                margin-top: 20px !important;
+            }
+        }
+
+        @media only screen and (max-width: 700px), only screen and (max-height: 600px) { /* size adjustments */
             .group-code { /* font */
                 font-size: 52pt;
                 margin-top: -85px;
@@ -1131,7 +1159,7 @@
                 </svg>
             </div>
             <div class="group-members">
-                <label id="member-count">1 member</label>
+                <label class="member-count">1 member</label>
                 <label class="waiting-msg" style="position: absolute; left: 0; right: 0; width: max-content; top: 0; bottom: 0; margin: auto; height: max-content;">waiting for players to join...</label>
                 <div class="member-grid">
                     <div class="member">
@@ -1191,10 +1219,10 @@
                     <text class="text-stroke" x="10" y="150" id="group-code">1283</text>
                 </svg>
                 <h1 class="code-header">is your group code</h1>
-                <label class="waiting-msg" style="position: absolute; bottom: 0;">waiting for the host...</label>
+                <label class="waiting-msg active" style="position: absolute; bottom: 0;">waiting for the host...</label>
             </div>
             <div class="group-members">
-                <label id="member-count">1 member</label>
+                <label class="member-count">1 member</label>
                 <div class="member-grid">
                     <div class="member">
                         <p class="member-name">SpaceCowboy21</p>
@@ -1232,6 +1260,10 @@
     <script>
         var join_code_valid = false;
 
+        function redirect() {
+            
+        }
+
         function startHost() {
             clearInterval(interval);
             document.querySelector(".content").classList.add("active");
@@ -1240,6 +1272,7 @@
             document.querySelector(".host-modal .host-modal-content").classList.remove("active");
             document.querySelector(".host-modal .host-modal-content").style.display = "none";
             setTimeout(createLobby, 1000);
+            createMembers("host", {});
         }
 
         function startJoin() {
@@ -1254,7 +1287,7 @@
             document.getElementById("join-name").value = my_name;
             document.getElementById("join-code").value = "";
             document.getElementById("join").style.opacity = 0.5;
-            console.log("set opacity");
+            createMembers("join", {});
         }
 
         function exitModal(type) {
@@ -1263,12 +1296,13 @@
             document.querySelector(".join-modal").classList.remove("active");
             deleteAllTiles();
             setTimeout(resetTiles, 300);
-            if (type == "host") abandonLobby();
+            if (type == "host") setTimeout(abandonLobby, 300);
             if (type == "join") setTimeout(() => {
                 document.querySelector(".join-modal-content").classList.remove("active");
                 document.querySelector(".join-modal-content-2").classList.remove("active");
                 document.querySelector(".join-modal-content-3").classList.remove("active");
                 document.querySelector(".join-modal .loading-msg").classList.remove("active");
+                leaveLobby();
             }, 300);
         }
 
@@ -1277,8 +1311,10 @@
             document.querySelector(".host-modal .host-modal-content").style.display = "flex";
             document.getElementById("group-code").textContent = my_lobby;
             my_name = createUsername();
+            updateHostName(null, my_name);
             document.getElementById("host-name").value = my_name;
             setTimeout(() => document.querySelector(".host-modal .host-modal-content").classList.add("active"), 500);
+            startListeningToMembers("host");
         }
 
         function nextJoinContent() {
@@ -1288,20 +1324,15 @@
             }
         }
 
-        function showJoinLobby() {
-            document.querySelector(".join-modal-content").classList.add("active");
-            document.querySelector(".join-modal-content-2").classList.remove("active");
-            setTimeout(() => document.querySelector(".join-modal-content-3").classList.add("active"), 200);
-            document.querySelector(".join-modal .loading-msg").classList.remove("active");
-        }
-
-        function updateHostName(e) {
-            my_name = e.target.value;
+        function updateHostName(e, override = false) {
+            if (!override) my_name = e.target.value;
+            if (my_lobby) firebase.database().ref("lobbies/" + my_lobby + "/members/0/name").set(override ? override : e.target.value);
         }
 
         function updateJoinName(e) {
             my_name = e.target.value;
             document.getElementById("next").style.opacity = (my_name == "" ? 0.5 : 1);
+            if (my_lobby) firebase.database().ref("lobbies/" + my_lobby + "/members/" + my_id + "/name").set(e.target.value);
         }
 
         function updateJoinCode(e) {
@@ -1313,25 +1344,69 @@
         function startJoinFromCode(match = false) {
             if ((!match && join_code_valid) || match) {
                 document.querySelector(".join-modal-content-2").classList.remove("active");
-                document.querySelector(".join-modal .loading-msg").classList.add("active");
+                setTimeout(() => document.querySelector(".join-modal .loading-msg").classList.add("active"), 200);
                 if (!match) {
                     const code = document.getElementById("join-code").value;
-                    joinFromCode(code);
+                    joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => triggerAlert("couldn't find group"));
                 }
-                else joinFromMatch();
+                else findMatchedLobbyCode().then((code) => joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => triggerAlert("no matches found!"))).catch(() => triggerAlert("no matches found!"));
             }
         }
 
-        function triggerAlert(content) {
+        function triggerAlert(content = "error occured") {
             exitModal("host");
             exitModal("join");
             document.querySelector(".alert").classList.remove("active");
             document.getElementById("alert-text").innerText = content;
-            setTimeout(() => document.querySelector(".alert").classList.add("active"), 10);
+            setTimeout(() => document.querySelector(".alert").classList.add("active"), 0);
         }
 
-        function onJoinConnect() {
+        function onJoinConnect(members) {
             document.querySelector(".join-modal .loading-msg").classList.remove("active");
+            document.querySelector(".join-modal-content").classList.add("active");
+            document.querySelector(".join-modal-content-2").classList.remove("active");
+            setTimeout(() => document.querySelector(".join-modal-content-3").classList.add("active"), 200);
+            document.querySelector(".join-modal .loading-msg").classList.remove("active");
+            createMembers("join", members);
+            connected = true;
+            document.querySelector(".join-modal .group-code .text-stroke").textContent = my_lobby;
+            startListeningToMembers("join");
+            startListeningToAbandoned();
+            startListeningToStart();
+        }
+
+        function createMembers(type = "join", members = {}) {
+            const container = document.querySelector(`.${type}-modal .member-grid`);
+            container.innerHTML = "";
+            const waiting = document.querySelector(`.${type}-modal .waiting-msg`);
+            const mem_count = Object.keys(members).length;
+            document.querySelector(`.${type}-modal .member-count`).innerText = `${mem_count} member${mem_count == 1 ? "" : "s"}`;
+            if (Object.keys(members).length == 0) type == "host" ? waiting.classList.add("active") : null;
+            else {
+                if (type == "host") waiting.classList.remove("active");
+                for (var member of Object.keys(members)) {
+                    const el = document.createElement("div");
+                    el.classList.add("member");
+                    const name = document.createElement("p");
+                    name.classList.add("member-name");
+                    name.innerText = members[member].name;
+                    el.appendChild(name);
+                    const img = document.createElement("img");
+                    img.setAttribute("mid", member);
+                    img.classList.add("member-remove");
+                    img.src = "x.png";
+                    img.setAttribute("onclick", "removeMember(this)");
+                    if (type == "host") {
+                        if (member != 0) el.appendChild(img);
+                    }
+                    container.appendChild(el);
+                }
+            }
+        }
+
+        function removeMember(el) {
+            const mid = el.getAttribute("mid");
+            firebase.database().ref("lobbies/" + my_lobby + "/members/" + mid).remove();
         }
     </script>
     <script>
@@ -1684,6 +1759,8 @@
         
         var my_lobby = 0;
         var my_name = "";
+        var my_id = 0;
+        var connected = false;
 
         function createUsername() {
             const adjectives = ["Quick", "Cool", "Fast", "Speedy", "Witty", "Smart", "Awesome", "Chill", "Super", "Typical", "Average", "Intelligent", "Unknown", "Famous"];
@@ -1692,11 +1769,22 @@
             return pick(adjectives) + pick(nouns) + pick(nums) + pick(nums);
         }
 
+        function createId() {
+            var id = "";
+            const alphabet = "0123456789abcdefghijklmnopqrstuvwxyz".split("");
+            for (var i = 0; i < 5; i++) id += pick(alphabet);
+            return id;
+        }
+
         function createLobbyCode() {
-            var code = ""
+            var code = "";
             const alphabet = "123456789".split("");
             for (var i = 0; i < 4; i++) code += pick(alphabet);
             return code;
+        }
+
+        function leaveLobby() {
+            firebase.database().ref("lobbies/" + my_lobby + "/members/" + my_id).remove();
         }
 
         function findMatchedLobbyCode() {
@@ -1718,37 +1806,83 @@
                     }
                     attempts++
                     if (available_lobbies.length == 0) {
-                        if (new Date() - start_search_time < 5*60*1000) { // give up after 5 mins
-                            setTimeout(() => {
-                                search();
-                            }, 10000) // refresh every 10 seconds
+                        if (new Date() - start_search_time < 60*1000) { // give up after 1 min
+                            setTimeout(search, 2000) // refresh every 2 seconds
                         }
-                        else triggerAlert("couldn't find a match!")
+                        else reject();
                     }
                     else resolve(pick(available_lobbies));
                 });
+                search();
             });
         }
 
         function joinLobbyByCode(code) {
-
+            return new Promise((resolve, reject) => {
+                my_lobby = code;
+                firebase.database().ref("lobbies/" + my_lobby).once("value").then((snapshot) => {
+                    const lobbies = snapshot.val();
+                    firebase.database().ref("lobbies/" + my_lobby + "/members").once("value").then((snapshot) => {
+                        const members = snapshot.val();
+                        if (members) {
+                            var recursions = 0;
+                            function tryCreateId() {
+                                if (recursions++ > 5) return 0;
+                                var try_id = createId();
+                                for (const mem_id of Object.keys(members)) {
+                                    if (try_id == mem_id) return tryCreateId();
+                                }
+                                my_id = try_id;
+                            }
+                            tryCreateId();
+                            firebase.database().ref("lobbies/" + my_lobby + "/members/" + my_id).set({
+                                name: my_name,
+                                data: {}
+                            }).then(() => resolve(members));
+                        }
+                        else reject();
+                    });
+                }).catch(reject);
+            })
         }
 
+        function startListeningToMembers(type = "join") {
+            firebase.database().ref("lobbies/" + my_lobby + "/members").on("value", ((snapshot) => {
+                const members = snapshot.val();
+                createMembers(type, members);
+            }));
+        }
+
+        function startListeningToAbandoned() {
+            firebase.database().ref("lobbies/" + my_lobby).on("value", ((snapshot) => {
+                if (snapshot.val() == null) exitModal("join");
+            }));
+        }
+
+        function startListeningToStart() {
+            firebase.database().ref("lobbies/" + my_lobby + "/start").on("value", ((snapshot) => {
+                if (snapshot.val()) redirect();
+            }));
+        }
+
+
         function collectOldLobbies(lobbies) {
-            for (const lobby_id of Object.keys(lobbies)) {
-                const lobby = lobbies[lobby_id];
-                if (!lobby.hasOwnProperty("users") || lobby.users == []) {
-                    firebase.database().ref("lobbies/" + lobby_id).remove();
-                    continue;
-                }
-                if (lobby.date) {
-                    const time_difference = new Date() - new Date(lobby.date);
-                    if (time_difference > expiry_time) {
+            if (lobbies) {
+                for (const lobby_id of Object.keys(lobbies)) {
+                    const lobby = lobbies[lobby_id];
+                    if (!lobby.hasOwnProperty("members") || lobby.members == []) {
                         firebase.database().ref("lobbies/" + lobby_id).remove();
                         continue;
                     }
+                    if (lobby.date) {
+                        const time_difference = new Date() - new Date(lobby.date);
+                        if (time_difference > expiry_time) {
+                            firebase.database().ref("lobbies/" + lobby_id).remove();
+                            continue;
+                        }
+                    }
+                    else firebase.database().ref("lobbies/" + lobby_id).remove();
                 }
-                else firebase.database().ref("lobbies/" + lobby_id).remove();
             }
         }
 
@@ -1758,7 +1892,15 @@
                 console.log(my_lobby);
                 firebase.database().ref("lobbies/" + lobby_id).set({
                     date: new Date().toISOString(),
-                    users: ["host"]
+                    members: {
+                        0: {
+                            name: my_name,
+                            data: {},
+                            host: true
+                        }
+                    },
+                    private: false,
+                    locked: false
                 });
                 onLobbyCreated();
             }
