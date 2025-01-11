@@ -1314,7 +1314,7 @@
             }
 
             var prev_t = 0;
-            var full_pos = -500;
+            var full_pos = -700;
             const full_spd = 2;
             function drawOverlay() {
                 const dt = prev_t == 0 ? 0 : performance.now() - prev_t;
@@ -1339,9 +1339,12 @@
             drawOverlay();
         }
 
-        function redirect() {
+        function redirect(type = "join") {
             document.getElementById("overlay").style.display = "block";
-            startOverlayAnimation();
+            setTimeout(startOverlayAnimation, 200);
+            setTimeout(() => {
+                window.location.href = `main.html?t=${type}&id=${my_id}&n=${my_name}&l=${my_lobby}`;
+            }, 1500);
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
@@ -1387,6 +1390,7 @@
                 document.querySelector(".join-modal-content-3").classList.remove("active");
                 document.querySelector(".join-modal .loading-msg").classList.remove("active");
                 leaveLobby();
+                cancelMatchFinding();
             }, 300);
         }
 
@@ -1871,11 +1875,18 @@
             firebase.database().ref("lobbies/" + my_lobby + "/members/" + my_id).remove();
         }
 
+        var match_timeout = null;
+
+        function cancelMatchFinding() {
+            if (match_timeout) clearTimeout(match_timeout);
+        }
+
         function findMatchedLobbyCode() {
             const start_search_time = new Date();
             var attempts = 0;
             return new Promise((resolve, reject) => {
                 const search = () => firebase.database().ref("lobbies").once("value").then((snapshot) => {
+                    if (!document.querySelector(".join-modal").classList.contains("active")) return;
                     const lobbies = snapshot.val();
                     if (attempts == 0) collectOldLobbies(lobbies);
                     const available_lobbies = [];
@@ -1891,7 +1902,7 @@
                     attempts++
                     if (available_lobbies.length == 0) {
                         if (new Date() - start_search_time < 60*1000) { // give up after 1 min
-                            setTimeout(search, 2000) // refresh every 2 seconds
+                            match_timeout = setTimeout(search, 2000) // refresh every 2 seconds
                         }
                         else reject();
                     }
@@ -1945,7 +1956,7 @@
 
         function startListeningToStart() {
             firebase.database().ref("lobbies/" + my_lobby + "/start").on("value", ((snapshot) => {
-                if (snapshot.val()) redirect();
+                if (snapshot.val()) redirect("join");
             }));
         }
 
@@ -2020,7 +2031,7 @@
         function startHostGame() {
             firebase.database().ref("lobbies/" + my_lobby + "/start").set(true);
             firebase.database().ref("lobbies/" + my_lobby + "/locked").set(true);
-            redirect();
+            redirect("host");
         }
     </script>
 </body>
