@@ -284,6 +284,7 @@
             opacity: 0;
             transform: scale(0.8);
             pointer-events: none;
+            z-index: 4;
         }
 
         .notify-msg * {
@@ -347,6 +348,24 @@
                 border-radius: 15px;
             }
         }
+
+        #recenter-btn {
+            position: absolute;
+            top: 35px;
+            right: 50px;
+            width: 30px;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        #recenter-btn.active {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
     </style>
 </head>
 
@@ -360,6 +379,7 @@
     <!-- <h1 class="ui score">0</h1> -->
     <div class="notify-msg"><div></div><img src="alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span></div>
     <button class="submit-btn" onclick="tryDraw()"><img src="submit.png" style="height: 12px;"></img>draw</button>
+    <img id="recenter-btn" src="recenter.png" onclick="recenterTiles()"></img>
     <h1 id="score">0</h1>
     <h1 id="timer"></h1>
     <!-- <div class="ui take-2" onclick="verifyTiles(tiles);">
@@ -437,7 +457,6 @@
         document.ontouchstart = (e) => {
             const touch = e.touches[0];
             if (touch) {
-                console.log(touch.target);
                 if (touch.target.classList.contains("tile")) {
                     target = touch.target;
                     target_initial_position = tiles[target.getAttribute("tid")].position;
@@ -849,6 +868,7 @@
             }
             const center = [(far_right + far_left)/2, (far_bottom + far_top)/2];
             setGridPos([anchor_pos[0] - center[0], anchor_pos[1] - center[1]], 0.5, "power4.out");
+            onPanningFinished();
         }
 
         function tileInScreen(tile) {
@@ -1072,6 +1092,7 @@
         const auto_draw_delay = 61*1000;
 
         function onPanningFinished() {
+            const recenter_btn = document.getElementById("recenter-btn");
             var tiles_hidden = true;
             for (const [i, tile] of Object.entries(tiles)) {
                 if (tileInScreen(tile)) {
@@ -1079,7 +1100,8 @@
                     break;
                 }
             }
-            if (tiles_hidden);
+            if (tiles_hidden) recenter_btn.classList.add("active");
+            else recenter_btn.classList.remove("active");
         }
 
         function triggerAlert(content) {
@@ -1117,20 +1139,24 @@
             }
         }
 
+        var deck = [...alphaweightmap];
         function assignDraws(n, init = false, auto = false) {
-            var deck = [...alphaweightmap];
             ref(my_lobby_path + "members").once("value").then((snapshot) => {
                 const members = snapshot.val();
                 const mem_count = Object.keys(members).length;
-                if (init) deck = nrep(alphaweightmap, Math.ceil(n*mem_count/100));
-                ref(my_lobby_data_path + "drawer").set(init ? "initial" : (auto ? "auto" : my_name));
-                for (const mid of Object.keys(members)) {
-                    const mem = members[mid];
-                    const initial_draw = ndraw(deck, n);
-                    ref(my_lobby_path + "members/" + mid + "/data/draw").set(initial_draw.join(""));
-                }
-                ref(my_lobby_data_path + "last_draw_date").set(new Date().toISOString());
-                ref(my_lobby_data_path + "deck").set(deck.join(""));
+                if (init) deck = nrep(alphaweightmap, Math.ceil(mem_count*(mem_count <= 4 ? 21 : mem_count <= 6 ? 15 : 11)/alphaweightmap.length));
+                ref(my_lobby_data_path + "deck").once("value").then((snapshot) => {
+                    if (snapshot.exists()) deck = snapshot.val().split("");
+                    ref(my_lobby_data_path + "drawer").set(init ? "initial" : (auto ? "auto" : my_name));
+                    for (const mid of Object.keys(members)) {
+                        const mem = members[mid];
+                        const draw = ndraw(deck, n).join("");
+                        ref(my_lobby_path + "members/" + mid + "/data/draw").set(draw);
+                        ref(my_lobby_path + "members/" + mid + "/data/draw_history").push(draw);
+                    }
+                    ref(my_lobby_data_path + "last_draw_date").set(new Date().toISOString());
+                    ref(my_lobby_data_path + "deck").set(deck.join(""));
+                })
             });
         }
 
@@ -1163,9 +1189,28 @@
             ref(my_lobby_path + "members/" + my_id + "/data/tiles").set(blobifyTiles());
         }
 
+        // restore connection
         ref(my_lobby_path + "members/" + my_id + "/data/tiles").once("value").then((snapshot) => {
-            console.log(snapshot.val())
-            if (snapshot.exists()) restoreTilesFromBlob(snapshot.val());
+            if (snapshot.exists()) {
+                restoreTilesFromBlob(snapshot.val());
+                ref(my_data_path + "draws_received").once("value").then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const draws_received = snapshot.val();
+                        ref(my_data_path + "draw_history").once("value").then((snapshot) => {
+                            if (snapshot.exists()) {
+                                const draw_history = Object.values(snapshot.val());
+                                const intended_draws_received = draw_history.length;
+                                if (draws_received < intended_draws_received) {
+                                    const draws_to_add = draw_history.slice(draws_received);
+                                    for (const draw of draws_to_add) createTileRow(draw.split(""), false);
+                                    ref(my_data_path + "draws_received").set(intended_draws_received);
+                                    recenterTiles();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
             else if (my_type == "host" || my_id == "0") assignDraws(7, true);
         });
 
@@ -1188,6 +1233,7 @@
             draw_start_date = new Date(new Date().getTime() - (auto_draw_delay - delay));
         }
 
+        // on someone draws
         var ct = 0;
         ref(my_data_path + "draw").on("value", (snapshot) => {
             if (ct++ > 0) {
@@ -1207,10 +1253,15 @@
                     }
                     if (my_type == "host") setTimer();
                     createTileRow(letters, twerp);
+                    ref(my_data_path + "draws_received").transaction((post) => {
+                        if (post) return post + 1;
+                        else return 1;
+                    });
                 });
             }
         });
 
+        // on draw date update
         var cdt = 0;
         ref(my_lobby_data_path + "last_draw_date").on("value", (snapshot) => {
             if (snapshot.exists()) {
@@ -1220,10 +1271,7 @@
                         assignDraws(2, false, true);
                         setTimer();
                     }
-                    else {
-                        console.log("restoring");
-                        setTimer(time_difference);
-                    }
+                    else setTimer(auto_draw_delay - time_difference);
                 }
                 else draw_start_date = new Date(snapshot.val());
             }
