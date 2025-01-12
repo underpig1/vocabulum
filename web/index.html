@@ -1002,6 +1002,11 @@
                 bottom: 25px;
             }
 
+            .notify-msg {
+                top: 50px !important;
+                right: 50px !important;
+            }
+
             .return {
                 left: 25px !important;
                 top: 25px !important;
@@ -1087,6 +1092,7 @@
         }
 
         #overlay {
+            display: none;
             position: absolute;
             top: 0;
             left: 0;
@@ -1094,6 +1100,75 @@
             bottom: 0;
             z-index: 3;
             display: none;
+        }
+
+        .notify-msg {
+            position: absolute;
+            top: 135px;
+            right: 85px;
+            display: flex;
+            line-height: 60px;
+            flex-direction: row;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+            width: max-content;
+            height: 60px;
+            font-size: 12pt;
+            outline: none;
+            padding: 0 25px;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            color: black;
+            background-color: #c9c9c9;
+            margin-right: auto;
+            cursor: pointer;
+            border: 4px black solid;
+            filter: drop-shadow(0 5px 0 black);
+            border-radius: 15px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .notify-msg * {
+            opacity: 0.9;
+        }
+
+        .notify-msg.active {
+            opacity: 1;
+            transform: none;
+        }
+
+        .notify-msg div {
+            background-color: #dbdbdb;
+            display: block;
+            position: absolute;
+            width: 0;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 15px 0 0 15px;
+        }
+
+        .notify-msg.active div {
+            animation: notify-move 3s linear forwards;
+        }
+
+        @keyframes notify-move {
+            0% {
+                width: 0;
+            }
+            90% {
+                width: 90%;
+                border-radius: 15px 0 0 15px;
+            }
+            100% {
+                width: 100%;
+                border-radius: 15px;
+            }
         }
     </style>
 </head>
@@ -1266,6 +1341,9 @@
             </div>
         </div>
     </div>
+    <div class="notify-msg">
+        <div></div><img src="alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span>
+    </div>
     <div class="alert">
         <span></span>
         <svg class="header" viewBox="0 0 230 70">
@@ -1435,18 +1513,40 @@
                 setTimeout(() => document.querySelector(".join-modal .loading-msg").classList.add("active"), 200);
                 if (!match) {
                     const code = document.getElementById("join-code").value;
-                    joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => triggerAlert("couldn't find group"));
+                    joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => {
+                        document.querySelector(".join-modal-content-2").classList.add("active");
+                        document.querySelector(".join-modal .loading-msg").classList.remove("active");
+                        triggerAlert("couldn't find group", false);
+                    });
                 }
                 else findMatchedLobbyCode().then((code) => joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => triggerAlert("no matches found!"))).catch(() => triggerAlert("no matches found!"));
             }
         }
 
-        function triggerAlert(content = "error occured") {
-            exitModal("host");
-            exitModal("join");
-            document.querySelector(".alert").classList.remove("active");
-            document.getElementById("alert-text").innerText = content;
-            setTimeout(() => document.querySelector(".alert").classList.add("active"), 0);
+        // function triggerAlert(content = "error occured") {
+        //     exitModal("host");
+        //     exitModal("join");
+        //     document.querySelector(".alert").classList.remove("active");
+        //     document.getElementById("alert-text").innerText = content;
+        //     setTimeout(() => document.querySelector(".alert").classList.add("active"), 0);
+        // }
+
+        var alert_close_timeout;
+        function triggerAlert(content, exit = true) {
+            document.querySelector(".notify-msg").classList.remove("active");
+            if (alert_close_timeout) {
+                clearTimeout(alert_close_timeout);
+                alert_close_timeout = null;
+            }
+            setTimeout(() => {
+                document.querySelector(".notify-msg span").innerText = content;
+                document.querySelector(".notify-msg").classList.add("active");
+                alert_close_timeout = setTimeout(() => document.querySelector(".notify-msg").classList.remove("active"), 3000);
+            }, 100);
+            if (exit) {
+                exitModal("host");
+                exitModal("join");
+            }
         }
 
         function onJoinConnect(members) {
