@@ -29,7 +29,10 @@
         }
 
         html, body {
+            width: 100%;
+            height: 100%;
             overscroll-behavior-x: none;
+            overflow: hidden;
         }
 
         * {
@@ -47,12 +50,14 @@
             touch-action: manipulation;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
         }
 
         body {
             margin: 0;
             user-select: none;
             overflow: hidden;
+            position: relative;
         }
 
         #background {
@@ -107,8 +112,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 0;
+            height: 0;
         }
 
         .ui {
@@ -700,6 +705,10 @@
             }
         }
         document.ontouchend = (e) => {
+            console.log(e.target);
+            if (e.target.getAttribute("id") == "background" || e.target.classList.contains("tile")) {
+                e.preventDefault();
+            }
             const touch = e.changedTouches[0];
             if (target && touch && !tiles_locked) {
                 var mouse_pos = [touch.pageX, touch.pageY];
@@ -1274,18 +1283,64 @@
         }
         const app = firebase.initializeApp(config);
         const database = firebase.database();
-        const ref = (r) => firebase.database().ref(r);
+        const empty_promise = () => {
+            return { then: () => {} }
+        };
+        var ref = (r) => firebase.database().ref(r);
 
         const params = new URLSearchParams(window.location.href.split("?")[1]);
-        const my_id = params.get("id");
         const my_type = params.get("t");
-        const my_name = params.get("n");
-        const my_lobby = params.get("l");
 
-        const my_lobby_path = "lobbies/" + my_lobby + "/";
-        const my_lobby_data_path = my_lobby_path + "data/";
-        const my_mem_path = my_lobby_path + "members/" + my_id + "/";
-        const my_data_path = my_mem_path + "data/";
+        var my_lobby_path, my_lobby_data_path, my_mem_path, my_data_path, my_id, my_name, my_lobby;
+        if (my_type == "classic") {
+            my_lobby_path = "";
+            my_lobby_data_path = "data/";
+            my_mem_path = "";
+            my_data_path = "data/";
+            ref = (path) => {
+                const p = path.split("/").filter((x) => x != "");
+                var exists = true;
+                var pos;
+                if (classic_db.hasOwnProperty(p[0])) {
+                    pos = classic_db[p[0]];
+                    for (const branch of p) {
+                        if (pos.hasOwnProperty(branch)) pos = JSON.parse(JSON.stringify(pos[branch]));
+                        else {
+                            exists = false;
+                            break;
+                        }
+                    }
+                }
+                else classic_db[p[0]] = create_pos(null);
+                console.log(pos);
+                return {
+                    once: (type = "value") => {
+                        if (type == "value") return new Promise((resolve, reject) => resolve(snapshot(exists, pos.value)));
+                    },
+                    on: (type = "value", callback) => {
+                        if (type == "value") pos.update_callbacks.push(callback);
+                    },
+                    set: (value) => {
+                        console.log("hi", pos);
+                        pos = {
+                            value,
+                            update_callbacks: pos.hasOwnProperty("update_callbacks") ? pos.update_callbacks : [],
+                        }
+                        for (const callback of pos.update_callbacks) callback();
+                    }
+                };
+            }
+        }
+        else {
+            my_id = params.get("id");
+            my_name = params.get("n");
+            my_lobby = params.get("l");
+
+            my_lobby_path = "lobbies/" + my_lobby + "/";
+            my_lobby_data_path = my_lobby_path + "data/";
+            my_mem_path = my_lobby_path + "members/" + my_id + "/";
+            my_data_path = my_mem_path + "data/";
+        }
 
         const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
         const npick = (arr, n) => Array(n).fill(0).map((x) => pick(arr));
@@ -1300,6 +1355,8 @@
         var game_over = false;
 
         const auto_draw_delay = 90*1000;
+
+        window.onscroll = ((e) => e.preventDefault());
 
         function triggerProgressMessage(id) {
             const msg = document.getElementById(id);
@@ -1382,15 +1439,18 @@
                 }, delay + 1000 + i*10);
                 setTimeout(() => {
                     if (!display) {
+                        unlockTiles();
                         if (final_round) {
-                            if (all_valid) ref(my_lobby_data_path + "winner_id").set(my_id);
+                            if (my_type == "classic") onClassicWin();
+                            else if (all_valid) {
+                                ref(my_lobby_data_path + "winner_id").set(my_id);
+                            }
                             else triggerAlert("not perfect yet!");
                         }
                         else {
-                            if (all_valid) assignDraws(2);
+                            if (all_valid || my_type == "classic") assignDraws(2);
                             else triggerAlert("not perfect yet!");
                         }
-                        unlockTiles();
                     }
                     else document.querySelector(".review-next").classList.add("active");
                     score_allowed = true;
@@ -1631,13 +1691,21 @@
             }
         });
 
+        const start_date = new Date();
+        if (my_type == "classic") {
+            assignDraws(7);
+            setTimer();
+        }
         setInterval(() => {
-            const seconds_until_draw = (auto_draw_delay - (new Date() - draw_start_date))/1000;
-            const mins = Math.max(0, Math.floor(seconds_until_draw / 60));
-            const secs = Math.max(0, Math.floor(seconds_until_draw % 60));
+            // if (my_type == "classic") var total_seconds = (new Date() - start_date) / 1000;
+            var total_seconds = (auto_draw_delay - (new Date() - draw_start_date))/1000;
+            const mins = Math.max(0, Math.floor(total_seconds / 60));
+            const secs = Math.max(0, Math.floor(total_seconds % 60));
             const text = mins + ":" + (secs < 10 ? "0" : "") + secs;
             document.getElementById("timer").innerHTML = text.split("").map((l) => `<span>${l}</span>`).join("");
         }, 100);
+    </script>
+    <script>
     </script>
 </body>
 

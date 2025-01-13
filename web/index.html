@@ -41,7 +41,9 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             margin: 0;
             user-select: none;
             overflow: hidden;
@@ -99,8 +101,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 0;
+            height: 0;
         }
     </style>
     <style>
@@ -142,11 +144,12 @@
         .actions {
             position: absolute;
             display: flex;
-            top: 35px;
             width: 50%;
-            height: 80%;
+            height: 100%;
+            gap: 40px;
             right: 0;
-            margin: 100px 0;
+            margin: 0;
+            padding: 125px 0;
             flex-direction: column;
             align-items: flex-end;
             justify-content: space-between;
@@ -156,18 +159,16 @@
             position: relative;
             display: flex;
             float: right;
-            flex: 1;
             flex-direction: column;
             flex-direction: row;
             justify-content: center;
             align-items: center;
-            height: 200px;
+            flex: 1;
             padding: 0 50px;
             cursor: pointer;
-            margin-bottom: 50px;
             transform: none;
             transition: width 0.2s ease;
-            clip-path: inset(0);
+            overflow: hidden;
         }
 
         .action-bg {
@@ -182,7 +183,7 @@
             background-repeat: no-repeat;
             pointer-events: none;
             opacity: 0;
-            transform: translateX(20%) translateY(-20px) rotateZ(2deg);
+            transform: translateX(20%) translateY(0) rotateZ(2deg);
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
@@ -348,17 +349,15 @@
 
         @media only screen and (max-height: 900px) {
             .actions {
-                top: 20px;
-                height: 80%;
+                margin-top: 30px;
+                height: calc(100% - 30px);
+                gap: 0;
+                padding: 60px 0;
             }
 
-            .action {
-                margin-bottom: 0;
-            }
-
-            .action.join {
+            /* .action.join {
                 margin-bottom: 50px;
-            }
+            } */
         }
 
         @media only screen and (max-width: 900px) {
@@ -449,7 +448,7 @@
             opacity: 0;
             pointer-events: none;
             transition: transform 0.3s ease, opacity 0.3s ease;
-            clip-path: inset(0);
+            overflow: hidden;
         }
 
         .modal.active {
@@ -524,6 +523,7 @@
             font-weight: 500;
             font-size: 24pt;
             line-height: 0;
+            width: max-content;
         }
 
         .host-modal.active .loading-msg {
@@ -790,7 +790,7 @@
             justify-content: center;
             box-shadow: 0 15px 15px 5px #00000022;
             pointer-events: none;
-            clip-path: inset(0);
+            overflow: hidden;
         }
 
         .alert.active {
@@ -1071,6 +1071,39 @@
             }
         }
 
+        @media only screen and (max-height: 700px) {
+            .group-options label:not(.checkbox) {
+                margin-top: -5px !important;
+            }
+
+            .return {
+                top: 0 !important;
+                font-size: 32pt !important;
+            }
+
+            .return .text-stroke {
+                stroke-width: 15px !important;
+            }
+
+            .host-modal-content, .join-modal-content-3 {
+                top: 85px !important;
+            }
+
+            .host-modal-content .ready {
+                font-size: 24pt !important;
+                bottom: -15px !important;
+                left: -5px !important;
+            }
+
+            .host-modal-content .ready .text-stroke {
+                stroke-width: 10px !important;
+            }
+
+            .host-modal-content {
+                padding-bottom: 40px !important;
+            }
+        }
+
         @media only screen and (max-width: 700px) {  /* mobile adjustments */
             .host-modal-content, .join-modal-content-3 { /* mobile */
                 padding-bottom: 80px;
@@ -1086,6 +1119,10 @@
                 flex: 1;
                 margin: 0;
                 min-height: 0;
+            }
+
+            .member-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -1365,7 +1402,7 @@
             canvas.height = window.innerHeight;
         }
 
-        document.addEventListener("resize", set_canvas_size);
+        window.addEventListener("resize", set_canvas_size);
         const rrange = (a, b) => Math.random()*(b - a) + a
         const slicel = (a, b, size, i) => [Math.max(a, a + (b-a)*i - size/2), Math.min(a + (b-a)*i + size/2, b)];
         set_canvas_size();
@@ -1432,15 +1469,23 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll("input[type='text']").forEach((input) => {
-                input.addEventListener("blur", () => {
+                input.addEventListener("blur", (e) => {
                     console.log("blurring");
-                    setTimeout(() => window.scrollTo(0, 0), 100);
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        document.body.style.zoom = 1.0;
+                        triggerAlert("hi", false)
+                    }, 100);
                 });
             });
         });
     </script>
     <script>
         var join_code_valid = false;
+
+        function startClassic() {
+            redirect("classic");
+        }
 
         function startHost() {
             clearInterval(interval);
@@ -1628,7 +1673,6 @@
         const tile_shadow = document.getElementById("tile-shadow");
 
         var anchor_pos = [window.innerWidth/2, window.innerHeight/2];
-        setGridPos(anchor_pos);
 
         function deleteAllTiles() {
             for (const stid of Object.keys(tiles)) {
@@ -1642,7 +1686,6 @@
             else tile_size = 100;
             deleteAllTiles();
         }
-        window.onresize();
 
         function debounce() {
             var timer;
@@ -1928,13 +1971,18 @@
             wd++;
         }
 
-        var interval = setInterval(updateHeroWord, 3000);
-        updateHeroWord();
+        var interval;
+        document.addEventListener("DOMContentLoaded", (e) => {
+            window.onresize();
+            setGridPos(anchor_pos);
+            var interval = setInterval(updateHeroWord, 3000);
+            updateHeroWord();
+        });
 
         function resetTiles() {
             clearInterval(interval);
             deleteAllTiles();
-            interval = setInterval(updateHeroWord, 3000);
+            if (interval) interval = setInterval(updateHeroWord, 3000);
             updateHeroWord();
         }
     </script>
