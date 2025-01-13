@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700;1000&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
     <title>Vocabulum</title>
     <style>
         :root {
@@ -19,6 +23,13 @@
             --light-red: #ff9080ff;
             --light-yellow: #f0df70ff;
             --light-green: #80df70ff;
+
+            touch-action: pan-x pan-y;
+            height: 100%;
+        }
+
+        html, body {
+            overscroll-behavior-x: none;
         }
 
         * {
@@ -229,7 +240,7 @@
             gap: 10px;
             align-items: center;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate3d(-50%, 0, 0);
             width: calc(100% - 50px);
             max-width: 300px;
             height: 65px;
@@ -245,15 +256,26 @@
             margin-right: auto;
             border-radius: 15px;
             cursor: pointer;
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, opacity 0.3s ease;
+            z-index: 2;
         }
 
         .submit-btn:hover {
-            transform: translateX(-50%) scale(0.95);
+            transform: translate3d(-50%, 0, 0) scale(0.95);
         }
 
-        .submit-btn:active {
-            transform: translateX(-50%) scale(0.93);
+        .submit-btn.active {
+            transform: translate3d(-50%, 0, 0) scale(0.9);
+        }
+
+        .submit-btn.hidden {
+            opacity: 0;
+            transform: translate3d(-50%, 0, 0) scale(0.7) !important;
+            pointer-events: none;
+        }
+
+        .submit-btn.final-round {
+            background-color: #ffdc6f;
         }
 
         .notify-msg {
@@ -335,6 +357,11 @@
             left: 50px;
         }
 
+        .control.hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
         @keyframes notify-move {
             0% {
                 width: 0;
@@ -346,6 +373,12 @@
             100% {
                 width: 100%;
                 border-radius: 15px;
+            }
+        }
+
+        @keyframes button-click {
+            0% {
+                transform: scale(1);
             }
         }
 
@@ -366,6 +399,188 @@
             opacity: 1;
             pointer-events: all;
         }
+
+        .progress-msg {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate3d(-50%, -50%, 0) scale(0.7) rotate(5deg);
+            width: 400px;
+            max-width: calc(100% - 100px);
+            pointer-events: none;
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .progress-msg.active {
+            opacity: 1;
+            transform: translate3d(-50%, -50%, 0) scale(1) rotate(0);
+        }
+
+        .review-header {
+            position: absolute;
+            left: 50px;
+            top: 100px;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 500;
+            font-size: 14pt;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .review-header.active {
+            transform: none;
+            opacity: 0.7;
+        }
+
+        .board-header {
+            position: absolute;
+            left: 50px;
+            top: 110px;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 700;
+            font-size: 32pt;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .board-header.active {
+            transform: none;
+            opacity: 1;
+        }
+
+        .review-next {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            height: 50px;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            cursor: pointer;
+            pointer-events: none;
+        }
+
+        .review-next.active {
+            opacity: 1;
+            transform: none;
+            pointer-events: all;
+        }
+
+        .review-next:hover {
+            transform: scale(0.9);
+        }
+
+        .review-next:active {
+            transform: scale(0.8);
+        }
+
+        #review-score {
+            position: absolute;
+            top: 110px;
+            right: 50px;
+            font-family: 'Poppins', Helvetica, sans-serif;
+            font-weight: 700;
+            font-weight: 500;
+            font-size: 32pt;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition-delay: 0.1s;
+        }
+
+        #review-score.active {
+            transform: none;
+            opacity: 1;
+        }
+
+        @media only screen and (max-width: 900px) {
+            .icon {
+                top: 25px;
+                left: 50%;
+                transform: translate3d(-50%, 0, 0);
+            }
+
+            .notify-msg {
+                left: 50%;
+                top: 75px;
+                font-size: 11pt;
+                transform: translate3d(-50%, 0, 0) scale(0.8);
+            }
+
+            .notify-msg.active {
+                transform: translate3d(-50%, 0, 0);
+            }
+
+            .submit-btn {
+                bottom: 30px;
+                font-size: 11pt;
+                height: 60px;
+                width: calc(100% - 250px);
+            }
+
+            #score {
+                bottom: 25px;
+                left: 25px;
+                width: 75px;
+                text-align: center;
+            }
+
+            #timer {
+                bottom: 25px;
+                right: 25px;
+            }
+
+            #recenter-btn {
+                right: 25px;
+                top: 30px;
+            }
+
+            .board-header {
+                left: 0;
+                right: 0;
+                top: 125px;
+                text-align: center;
+                font-size: 18pt;
+            }
+
+            .review-header {
+                left: 0;
+                right: 0;
+                top: 100px;
+                text-align: center;
+                font-size: 12pt;
+            }
+
+            #review-score {
+                left: 0;
+                right: 0;
+                top: 165px;
+                text-align: center;
+                font-size: 24pt;
+            }
+
+            .review-next {
+                left: 50%;
+                transform: translate3d(-50%, 0, 0) scale(0.7);
+            }
+
+            .review-next {
+                transform: translate3d(-50%, 0, 0) !important;
+            }
+
+            .review-next:hover {
+                transform: translate3d(-50%, 0, 0) scale(0.9);
+            }
+
+            .review-next:active {
+                transform: translate3d(-50%, 0, 0) scale(0.8);
+            }
+        }
     </style>
 </head>
 
@@ -374,14 +589,20 @@
     <div id="tiles">
         <div id="tile-shadow" class="tile"></div>
     </div>
-    <a class="icon" href="index.html"><img src="icon.svg" style="width: 200px;"></img></a>
+    <a class="icon" href="index.html"><img src="icon.png" style="width: 200px;"></img></a>
     <!-- <h1 class="ui timer"><span id="time-min">0</span>:<span id="time-sec">00</span></h1> -->
     <!-- <h1 class="ui score">0</h1> -->
     <div class="notify-msg"><div></div><img src="alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span></div>
-    <button class="submit-btn" onclick="tryDraw()"><img src="submit.png" style="height: 12px;"></img>draw</button>
+    <button class="submit-btn control" onclick="tryDraw(this)"><img src="submit.png" style="height: 12px;"></img><span>draw</span></button>
     <img id="recenter-btn" src="recenter.png" onclick="recenterTiles()"></img>
-    <h1 id="score">0</h1>
-    <h1 id="timer"></h1>
+    <h1 id="score" class="control">0</h1>
+    <h1 id="timer" class="control"></h1>
+    <img id="final-round-msg" src="final_round.png" class="progress-msg"></img>
+    <img id="game-over-msg" src="game_over.png" class="progress-msg"></img>
+    <h1 class="review-header">Let's see how everyone did...</h1>
+    <h1 class="board-header"><span>SlickPossum18</span>'s deck</h1>
+    <h1 id="review-score">0</h1>
+    <img class="review-next" src="next.png" onclick="reviewNext()"></img>
     <!-- <div class="ui take-2" onclick="verifyTiles(tiles);">
         <div class="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -412,6 +633,7 @@
         const seconds = document.getElementById("time-sec");
         const minutes = document.getElementById("time-min");
         var score_allowed = true;
+        var tiles_locked = false;
 
         const grid = document.getElementById("background");
         const tile_container = document.getElementById("tiles");
@@ -457,7 +679,7 @@
         document.ontouchstart = (e) => {
             const touch = e.touches[0];
             if (touch) {
-                if (touch.target.classList.contains("tile")) {
+                if (touch.target.classList.contains("tile") && !tiles_locked) {
                     target = touch.target;
                     target_initial_position = tiles[target.getAttribute("tid")].position;
                     tile_shadow.style.opacity = 1;
@@ -479,7 +701,7 @@
         }
         document.ontouchend = (e) => {
             const touch = e.changedTouches[0];
-            if (target && touch) {
+            if (target && touch && !tiles_locked) {
                 var mouse_pos = [touch.pageX, touch.pageY];
                 var snap_pos = snapToGrid(mouse_pos);
                 var tid = target.getAttribute("tid");
@@ -487,25 +709,6 @@
                 tileTwerp(target, snap_pos);
                 setTimeout(((jt) => target == jt ? null : jt.style.zIndex = 1).bind(null, target), 500);
                 tile_shadow.style.opacity = 0;
-
-                // var occupied_y = [];
-                // for (const stile of Object.values(tiles)) {
-                //     if (stile.position[0] == snap_pos[0]) occupied_y.push(stile.position[1]);
-                // }
-                // for (const stid of Object.keys(tiles)) {
-                //     if (tiles[stid].position[0] == snap_pos[0] && tiles[stid].position[1] == snap_pos[1] && tid != stid) {
-                //         if (occupied_y.length > 0) {
-                //             for (var i = snap_pos[1] + tile_size, j = snap_pos[1] - tile_size, c = true; ; i += tile_size, j -= tile_size, c = !c) {
-                //                 var new_y = c ? i : j;
-                //                 if (!occupied_y.includes(new_y)) break;
-                //             }
-                //         }
-                //         else var new_y = snap_pos[1] + tile_size;
-                //         tiles[stid].position[1] = new_y;
-                //         tileTwerp(tiles[stid].element, [snap_pos[0], new_y]);
-                //     }
-                // }
-
                 for (const stid of Object.keys(tiles)) {
                     if (tiles[stid].position[0] == snap_pos[0] && tiles[stid].position[1] == snap_pos[1] && tid != stid) {
                         tiles[stid].position = target_initial_position;
@@ -524,33 +727,10 @@
         }
         document.ontouchmove = (e) => {
             const touch = e.touches[0];
-            if (target && touch) {
+            if (target && touch && !tiles_locked) {
                 var tid = target.getAttribute("tid");
                 var mouse_pos = [touch.pageX, touch.pageY];
                 var snap_pos = resolveGridPos(mouse_pos);
-
-                // if (tile_is_contested) {
-                //     if (snap_pos[0] != contested_tile_position[0] || snap_pos[1] != contested_tile_position[1]) {
-                //         exiled_tile.position = contested_tile_position;
-                //         tileTwerp(exiled_tile.element, contested_tile_position);
-                //         contested_tile_position = [null, null];
-                //         tile_is_contested = false;
-                //     }
-                // }
-
-                // for (const stid of Object.keys(tiles)) {
-                //     if (tiles[stid].position[0] == snap_pos[0] && tiles[stid].position[1] == snap_pos[1] && tid != stid) {
-                //         exiled_tile = tiles[stid];
-                //         contested_tile_position = snap_pos;
-                //         exiled_tile.position = target_initial_position;
-                //         tileTwerp(exiled_tile.element, target_initial_position);
-                //         tile_is_contested = true;
-                //         break;
-                //     };
-                // }
-
-                // target.style.top = snap_pos[1] + "px";
-                // target.style.left = snap_pos[0] + "px";
 
                 tiles[tid].position = snap_pos;
                 tileTwerp(target, snap_pos, 0.1);
@@ -564,7 +744,7 @@
 
         document.onmousedown = (e) => {
             if (e.button == 0 && e.target.classList) {
-                if (e.target.classList.contains("tile")) {
+                if (e.target.classList.contains("tile") && !tiles_locked) {
                     target = e.target;
                     target_initial_position = tiles[target.getAttribute("tid")].position;
                     tile_shadow.style.opacity = 1;
@@ -585,7 +765,7 @@
             }
         }
         document.onmouseup = (e) => {
-            if (target) {
+            if (target && !tiles_locked) {
                 var mouse_pos = [e.pageX, e.pageY];
                 var snap_pos = snapToGrid(mouse_pos);
                 var tid = target.getAttribute("tid");
@@ -610,7 +790,7 @@
             tile_is_contested = false;
         }
         document.onmousemove = (e) => {
-            if (target) {
+            if (target && !tiles_locked) {
                 var tid = target.getAttribute("tid");
                 var mouse_pos = [e.pageX, e.pageY];
                 var snap_pos = resolveGridPos(mouse_pos);
@@ -622,6 +802,18 @@
                 var mouse_pos = [e.pageX, e.pageY];
                 setGridPos(grid_initial_position.map((c, i) => c + mouse_pos[i] - mouse_initial_position[i]));
             }
+        }
+
+        function lockTiles() {
+            tiles_locked = true;
+            if (target) {
+                var tid = target.getAttribute("tid");
+                tiles[tid].position = snapToGrid(tiles[tid].position);
+            }
+        }
+
+        function unlockTiles() {
+            tiles_locked = false;
         }
 
         function selectTileByTID(tid) {
@@ -669,6 +861,20 @@
             determineBorderRadii();
         }
 
+        function clearTiles() {
+            for (var [i, tile] of Object.entries(tiles)) {
+                gsap.to(tile.element, {
+                    duration: 0.2,
+                    scale: 0,
+                    overwrite: "auto"
+                });
+            }
+            setTimeout(() => {
+                document.getElementById("tiles").innerHTML = "";
+                tiles = {};
+            }, 200);
+        }
+
         function tileAppear(target) {
             gsap.to(target, {
                 duration: 0.2,
@@ -702,7 +908,7 @@
             return position.map((c, i) => c - (tile_relative ? grid_pos[i] : 0) - tile_size / 2);
         }
 
-        function cloneElement(tile, delay, color = "var(--light-green)", wild = false) {
+        function cloneElement(tile, delay, color = "var(--light-green)", wild = false, el = document.getElementById("score")) {
             setTimeout(() => {
                 var copy = tile.element.cloneNode(true);
                 copy.setAttribute("tid", "-1");
@@ -719,12 +925,12 @@
                     y: tile.position[1] + grid_pos[1] - tile_size / 2 + Math.random() * 5,
                     ease: "power4.out"
                 });
-                var score_ui_rect = document.getElementById("score").getBoundingClientRect();
+                var score_ui_rect = el.getBoundingClientRect();
                 gsap.to(copy, {
                     duration: 1,
                     delay: 0.5,
                     x: score_ui_rect.left + score_ui_rect.width / 2 - tile_size / 2 + "px",
-                    y: score_ui_rect.top - tile_size / 2 + 10 + "px",
+                    y: score_ui_rect.top + score_ui_rect.height / 2 - tile_size / 2 + "px",
                     ease: "power4.out"
                 });
                 gsap.to(copy, {
@@ -866,7 +1072,7 @@
                 if (tile.position[1] < far_top || far_top == null) far_top = tile.position[1];
                 if (tile.position[1] > far_bottom || far_bottom == null) far_bottom = tile.position[1];
             }
-            const center = [(far_right + far_left)/2, (far_bottom + far_top)/2];
+            const center = [(far_right + far_left)/2 + tile_size/2, (far_bottom + far_top)/2 + tile_size/2];
             setGridPos([anchor_pos[0] - center[0], anchor_pos[1] - center[1]], 0.5, "power4.out");
             onPanningFinished();
         }
@@ -1081,6 +1287,8 @@
         const my_mem_path = my_lobby_path + "members/" + my_id + "/";
         const my_data_path = my_mem_path + "data/";
 
+        const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
+        const npick = (arr, n) => Array(n).fill(0).map((x) => pick(arr));
         const idraw = (deck) => deck.splice(Math.floor(Math.random()*deck.length), 1)[0];
         const ndraw = (deck, n) => Array(n).fill(0).map((x) => x = idraw(deck));
         const nrep = (arr, n) => Array(n).fill(arr).flat();
@@ -1088,8 +1296,29 @@
         var draw_timeout;
         var draw_start_date;
         var alert_close_timeout;
+        var final_round = false;
+        var game_over = false;
 
-        const auto_draw_delay = 61*1000;
+        const auto_draw_delay = 90*1000;
+
+        function triggerProgressMessage(id) {
+            const msg = document.getElementById(id);
+            msg.classList.add("active");
+            setTimeout(() => msg.classList.remove("active"), 2000);
+        }
+
+        function triggerBoardHeader(name) {
+            const board_header = document.querySelector(".board-header");
+            const review_score = document.getElementById("review-score");
+            board_header.classList.remove("active");
+            review_score.classList.remove("active");
+            setTimeout(() => {
+                board_header.querySelector("span").innerText = name;
+                setTimeout(() => review_score.innerText = "0", 100);
+                board_header.classList.add("active");
+                review_score.classList.add("active");
+            }, 300);
+        }
 
         function onPanningFinished() {
             const recenter_btn = document.getElementById("recenter-btn");
@@ -1117,34 +1346,76 @@
             }, 100);
         }
 
-        function tryDraw() {
+        function tryDraw(el = null, display = false) {
+            if (el) {
+                el.classList.add("active");
+                setTimeout(() => el.classList.remove("active"), 200);
+            }
+
             if (score_allowed) {
                 score_allowed = false;
+                const score_display = document.getElementById(display ? "review-score" : "score");
+                lockTiles();
                 var words = getWordMap(tiles);
                 var delay = 0;
+                var score = 0;
                 var all_valid = true;
                 for (var i = 0; i < words.length; i++) {
-                    if (!words[i].valid) all_valid = false;
+                    if (!words[i].valid) {
+                        all_valid = false;
+                        score -= words[i].word.length;
+                    }
+                    else score += getWordScore(words[i].word);
                     for (var j = 0; j < words[i].tiles.length; j++) {
                         const tile = words[i].tiles[j];
-                        cloneElement(tile, delay, words[i].valid ? "var(--light-green)" : (words[i].disconnected ? "var(--light-yellow)" : "var(--light-red)"));
+                        cloneElement(tile, delay, words[i].valid ? "var(--light-green)" : (words[i].disconnected ? "var(--light-yellow)" : "var(--light-red)"), false, score_display);
                         delay += 50;
                     }
                 }
+                const prev_score = parseInt(score_display.innerText);
+                const inc_dir = (score > prev_score ? 1 : -1);
+                var temp_score = prev_score;
+                console.log(prev_score);
+                for (var i = 0; i < Math.abs(score - prev_score); i++) setTimeout(() => {
+                    temp_score += inc_dir;
+                    score_display.innerText = temp_score;
+                }, delay + 1000 + i*10);
                 setTimeout(() => {
-                    if (all_valid) assignDraws(2);
-                    else triggerAlert("need to finish deck before you draw!");
+                    if (!display) {
+                        if (final_round) {
+                            if (all_valid) ref(my_lobby_data_path + "winner_id").set(my_id);
+                            else triggerAlert("not perfect yet!");
+                        }
+                        else {
+                            if (all_valid) assignDraws(2);
+                            else triggerAlert("not perfect yet!");
+                        }
+                        unlockTiles();
+                    }
+                    else document.querySelector(".review-next").classList.add("active");
                     score_allowed = true;
                 }, delay + 500);
             }
         }
 
-        var deck = [...alphaweightmap];
+        const full_deck = [...alphaweightmap];
+        var deck = full_deck;
+
+        function createInitialDeck(mem_count) {
+            const draws_per_game = 8;
+            const tiles_per_player = 7 + 2*draws_per_game;
+            const tiles_total = tiles_per_player*mem_count;
+            var full_decks_count = Math.floor(tiles_total / full_deck.length);
+            var extra_tiles_count = Math.floor(tiles_total % full_deck.length);
+            deck = nrep(full_deck, full_decks_count).concat(npick(full_deck, extra_tiles_count));
+            return deck;
+        }
+
         function assignDraws(n, init = false, auto = false) {
             ref(my_lobby_path + "members").once("value").then((snapshot) => {
                 const members = snapshot.val();
                 const mem_count = Object.keys(members).length;
-                if (init) deck = nrep(alphaweightmap, Math.ceil(mem_count*(mem_count <= 4 ? 21 : mem_count <= 6 ? 15 : 11)/alphaweightmap.length));
+                if (init) createInitialDeck(mem_count);
                 ref(my_lobby_data_path + "deck").once("value").then((snapshot) => {
                     if (snapshot.exists()) deck = snapshot.val().split("");
                     ref(my_lobby_data_path + "drawer").set(init ? "initial" : (auto ? "auto" : my_name));
@@ -1156,6 +1427,10 @@
                     }
                     ref(my_lobby_data_path + "last_draw_date").set(new Date().toISOString());
                     ref(my_lobby_data_path + "deck").set(deck.join(""));
+
+                    if (deck.length < mem_count*2) {
+                        ref(my_lobby_data_path + "final_round").set(true);
+                    }
                 })
             });
         }
@@ -1167,7 +1442,6 @@
                 createTile(letter, alphamap[letter].value, position);
             }
             recenterTiles();
-            triggerAlert("connection restored!");
         }
 
         function blobifyTiles() {
@@ -1193,6 +1467,7 @@
         ref(my_lobby_path + "members/" + my_id + "/data/tiles").once("value").then((snapshot) => {
             if (snapshot.exists()) {
                 restoreTilesFromBlob(snapshot.val());
+                triggerAlert("connection restored!");
                 ref(my_data_path + "draws_received").once("value").then((snapshot) => {
                     if (snapshot.exists()) {
                         const draws_received = snapshot.val();
@@ -1227,8 +1502,10 @@
         function setTimer(delay = auto_draw_delay) {
             if (draw_timeout) clearTimeout(draw_timeout);
             draw_timeout = setTimeout(() => {
-                assignDraws(2, false, true);
-                setTimer();
+                if (!final_round) {
+                    assignDraws(2, false, true);
+                    setTimer();
+                }
             }, delay);
             draw_start_date = new Date(new Date().getTime() - (auto_draw_delay - delay));
         }
@@ -1236,28 +1513,31 @@
         // on someone draws
         var ct = 0;
         ref(my_data_path + "draw").on("value", (snapshot) => {
-            if (ct++ > 0) {
+            if (snapshot.exists()) {
                 const letters = snapshot.val().split("");
-                ref(my_lobby_data_path + "drawer").once("value").then((snapshot) => {
-                    const drawer = snapshot.val();
-                    var twerp = true;
-                    if (drawer) {
-                        if (drawer != "initial" && drawer != my_name && drawer != "auto") {
-                            triggerAlert(drawer + " just forced a draw!");
-                            twerp = false;
+                if (ct++ > 0) {
+                    ref(my_lobby_data_path + "drawer").once("value").then((snapshot) => {
+                        const drawer = snapshot.val();
+                        var twerp = true;
+                        if (drawer) {
+                            if (drawer != "initial" && drawer != my_name && drawer != "auto") {
+                                triggerAlert(drawer + " just forced a draw!");
+                                twerp = false;
+                            }
+                            else if (drawer == "auto") {
+                                triggerAlert("everyone given a helping hand");
+                                twerp = false;
+                            }
                         }
-                        else if (drawer == "auto") {
-                            triggerAlert("everyone given help!");
-                            twerp = false;
-                        }
-                    }
-                    if (my_type == "host") setTimer();
-                    createTileRow(letters, twerp);
-                    ref(my_data_path + "draws_received").transaction((post) => {
-                        if (post) return post + 1;
-                        else return 1;
+                        if (my_type == "host") setTimer();
+                        createTileRow(letters, twerp);
+                        ref(my_data_path + "draws_received").transaction((post) => {
+                            if (post) return post + 1;
+                            else return 1;
+                        });
                     });
-                });
+                }
+                else if (Object.keys(tiles).length == 0) createTileRow(letters, true);
             }
         });
 
@@ -1277,10 +1557,84 @@
             }
         });
 
+        // on final round declaration
+        ref(my_lobby_data_path + "final_round").on("value", (snapshot) => {
+            if (snapshot.val()) {
+                ref(my_lobby_data_path + "winner_id").once("value").then((snapshot) => {
+                    if (!snapshot.val()) {
+                        final_round = true;
+                        triggerProgressMessage("final-round-msg");
+                        const sumbit_btn = document.querySelector(".submit-btn");
+                        sumbit_btn.style.transition = "transform 0.5s ease, opacity 0.5s ease"
+                        console.log(sumbit_btn.style.transition);
+                        setTimeout(() => sumbit_btn.classList.add("hidden"), 100);
+                        setTimeout(() => {
+                            sumbit_btn.classList.add("final-round");
+                            sumbit_btn.querySelector("span").innerText = "finish!";
+                            sumbit_btn.classList.remove("hidden");
+                        }, 600);
+                        setTimeout(() => sumbit_btn.style.transition = "", 700);
+                        document.getElementById("timer").style.display = "none";
+                        if (draw_timeout) clearTimeout(draw_timeout);
+                    }
+                });
+            }
+        });
+
+        function displayBoard(t_blob) {
+            clearTiles();
+            triggerBoardHeader(t_blob.name);
+            setTimeout(() => restoreTilesFromBlob(t_blob.blob), 500);
+            setTimeout(() => tryDraw(null, true), 1000);
+        }
+
+        function reviewNext() {
+            const current_blob = t_blobs[++blob_i % t_blobs.length];
+            displayBoard(current_blob);
+            document.querySelector(".review-next").classList.remove("active");
+        }
+
+        // on winner declaration
+        var blob_i = 0;
+        var t_blobs = [];
+        ref(my_lobby_data_path + "winner_id").on("value", (snapshot) => {
+            const winner_id = snapshot.val();
+            if (winner_id) {
+                lockTiles();
+                triggerProgressMessage("game-over-msg");
+                game_over = true;
+                document.querySelector(".submit-btn").classList.add("hidden");
+                document.getElementById("timer").classList.add("hidden");
+                document.getElementById("score").classList.add("hidden");
+                if (draw_timeout) clearTimeout(draw_timeout);
+                clearTiles();
+                setTimeout(() => {
+                    setTimeout(() => document.querySelector(".review-header").classList.add("active"), 200);
+                    ref(my_lobby_path + "members").once("value").then((snapshot) => {
+                        const members = snapshot.val();
+                        for (const [mid, mem] of Object.entries(members)) {
+                            const blob = mem.data.tiles;
+                            const is_winner = mid == winner_id;
+                            if (blob) {
+                                const t_blob = {
+                                    name: mem.name,
+                                    blob,
+                                    winner: is_winner
+                                }
+                                if (is_winner) t_blobs.unshift(t_blob);
+                                else t_blobs.push(t_blob);
+                            }
+                        }
+                        displayBoard(t_blobs[0]);
+                    });
+                }, 2000);
+            }
+        });
+
         setInterval(() => {
             const seconds_until_draw = (auto_draw_delay - (new Date() - draw_start_date))/1000;
-            const mins = Math.floor(seconds_until_draw / 60);
-            const secs = Math.floor(seconds_until_draw % 60);
+            const mins = Math.max(0, Math.floor(seconds_until_draw / 60));
+            const secs = Math.max(0, Math.floor(seconds_until_draw % 60));
             const text = mins + ":" + (secs < 10 ? "0" : "") + secs;
             document.getElementById("timer").innerHTML = text.split("").map((l) => `<span>${l}</span>`).join("");
         }, 100);
