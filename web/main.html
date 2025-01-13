@@ -919,35 +919,66 @@
 
         function cloneElement(tile, delay, color = "var(--light-green)", wild = false, el = document.getElementById("score")) {
             setTimeout(() => {
-                var copy = tile.element.cloneNode(true);
-                copy.setAttribute("tid", "-1");
+                const is_valid = color == "var(--light-green)";
+                var copy = tile.element.cloneNode(false);
+                Array.from(tile.element.childNodes).forEach((child) => {
+                    var should_clone = true;
+                    if (child.nodeType == 1) {
+                        if (child.tagName == "DIV") should_clone = false;
+                    }
+                    if (should_clone) copy.appendChild(child.cloneNode(true));
+                });
                 copy.style.borderRadius = tile_size / 5 + "px";
                 copy.style.backgroundColor = color;
                 copy.style.boxShadow = "0 0 5px #00000033";
+                copy.style.zIndex = 4;
+                copy.style.position = "absolute";
                 document.body.appendChild(copy);
+                if (is_valid) document.body.appendChild(copy);
+                else tile.element.appendChild(copy);
+                const position = is_valid ? [tile.position[0] + grid_pos[0], tile.position[1] + grid_pos[1]] : [0, 0];
                 gsap.set(copy, {
-                    x: tile.position[0] + grid_pos[0],
-                    y: tile.position[1] + grid_pos[1],
+                    x: position[0],
+                    y: position[1],
                 });
                 gsap.to(copy, {
                     duration: 0.5,
-                    y: tile.position[1] + grid_pos[1] - tile_size / 2 + Math.random() * 5,
+                    y: position[1] - tile_size/2 + Math.random()*5,
                     ease: "power4.out"
                 });
-                var score_ui_rect = el.getBoundingClientRect();
-                gsap.to(copy, {
-                    duration: 1,
-                    delay: 0.5,
-                    x: score_ui_rect.left + score_ui_rect.width / 2 - tile_size / 2 + "px",
-                    y: score_ui_rect.top + score_ui_rect.height / 2 - tile_size / 2 + "px",
-                    ease: "power4.out"
-                });
-                gsap.to(copy, {
-                    duration: 0.5,
-                    delay: 1.0,
-                    scale: 0
-                });
-                setTimeout(() => document.body.removeChild(copy), 2000);
+                if (is_valid) {
+                    var score_ui_rect = el.getBoundingClientRect();
+                    gsap.to(copy, {
+                        duration: 1,
+                        delay: 0.5,
+                        x: score_ui_rect.left + score_ui_rect.width / 2 - tile_size / 2 + "px",
+                        y: score_ui_rect.top + score_ui_rect.height / 2 - tile_size / 2 + "px",
+                        ease: "power4.out"
+                    });
+                    gsap.to(copy, {
+                        duration: 0.5,
+                        delay: 1.0,
+                        scale: 0
+                    });
+                }
+                else {
+                    gsap.to(copy, {
+                        duration: 1,
+                        delay: 0.5,
+                        y: position[1] - tile_size,
+                        ease: "power4.out"
+                    });
+                    gsap.to(copy, {
+                        duration: 0.5,
+                        delay: 1,
+                        opacity: 0,
+                        ease: "power4.out"
+                    });
+                }
+                setTimeout(() => {
+                    if (is_valid) document.body.removeChild(copy);
+                    else tile.element.removeChild(copy);
+                }, 2000);
             }, delay);
         }
 
@@ -1290,57 +1321,14 @@
 
         const params = new URLSearchParams(window.location.href.split("?")[1]);
         const my_type = params.get("t");
+        const my_id = params.get("id");
+        const my_name = params.get("n");
+        const my_lobby = params.get("l");
 
-        var my_lobby_path, my_lobby_data_path, my_mem_path, my_data_path, my_id, my_name, my_lobby;
-        if (my_type == "classic") {
-            my_lobby_path = "";
-            my_lobby_data_path = "data/";
-            my_mem_path = "";
-            my_data_path = "data/";
-            ref = (path) => {
-                const p = path.split("/").filter((x) => x != "");
-                var exists = true;
-                var pos;
-                if (classic_db.hasOwnProperty(p[0])) {
-                    pos = classic_db[p[0]];
-                    for (const branch of p) {
-                        if (pos.hasOwnProperty(branch)) pos = JSON.parse(JSON.stringify(pos[branch]));
-                        else {
-                            exists = false;
-                            break;
-                        }
-                    }
-                }
-                else classic_db[p[0]] = create_pos(null);
-                console.log(pos);
-                return {
-                    once: (type = "value") => {
-                        if (type == "value") return new Promise((resolve, reject) => resolve(snapshot(exists, pos.value)));
-                    },
-                    on: (type = "value", callback) => {
-                        if (type == "value") pos.update_callbacks.push(callback);
-                    },
-                    set: (value) => {
-                        console.log("hi", pos);
-                        pos = {
-                            value,
-                            update_callbacks: pos.hasOwnProperty("update_callbacks") ? pos.update_callbacks : [],
-                        }
-                        for (const callback of pos.update_callbacks) callback();
-                    }
-                };
-            }
-        }
-        else {
-            my_id = params.get("id");
-            my_name = params.get("n");
-            my_lobby = params.get("l");
-
-            my_lobby_path = "lobbies/" + my_lobby + "/";
-            my_lobby_data_path = my_lobby_path + "data/";
-            my_mem_path = my_lobby_path + "members/" + my_id + "/";
-            my_data_path = my_mem_path + "data/";
-        }
+        const my_lobby_path = "lobbies/" + my_lobby + "/";
+        const my_lobby_data_path = my_lobby_path + "data/";
+        const my_mem_path = my_lobby_path + "members/" + my_id + "/";
+        const my_data_path = my_mem_path + "data/";
 
         const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
         const npick = (arr, n) => Array(n).fill(0).map((x) => pick(arr));
@@ -1354,7 +1342,7 @@
         var final_round = false;
         var game_over = false;
 
-        const auto_draw_delay = 90*1000;
+        const auto_draw_delay = (my_type == "classic" ? 60 : 90)*1000;
 
         window.onscroll = ((e) => e.preventDefault());
 
@@ -1432,7 +1420,6 @@
                 const prev_score = parseInt(score_display.innerText);
                 const inc_dir = (score > prev_score ? 1 : -1);
                 var temp_score = prev_score;
-                console.log(prev_score);
                 for (var i = 0; i < Math.abs(score - prev_score); i++) setTimeout(() => {
                     temp_score += inc_dir;
                     score_display.innerText = temp_score;
@@ -1441,20 +1428,34 @@
                     if (!display) {
                         unlockTiles();
                         if (final_round) {
-                            if (my_type == "classic") onClassicWin();
-                            else if (all_valid) {
-                                ref(my_lobby_data_path + "winner_id").set(my_id);
+                            if (all_valid) {
+                                if (my_type == "classic") onClassicWin();
+                                else ref(my_lobby_data_path + "winner_id").set(my_id);
                             }
                             else triggerAlert("not perfect yet!");
                         }
                         else {
-                            if (all_valid || my_type == "classic") assignDraws(2);
+                            if (all_valid) {
+                                if (my_type == "classic") {
+                                    if (deck.length >= 2) {
+                                        setTimer(auto_draw_delay, classic_timer_callback);
+                                        createTileRow(ndraw(deck, 2));
+                                    }
+                                    else startFinalRound();
+                                }
+                                else assignDraws(2);
+                            }
+                            else if (my_type == "classic" && !classic_timed) if (deck.length >= 2) {
+                                setTimer(auto_draw_delay, classic_timer_callback);
+                                createTileRow(ndraw(deck, 2));
+                            }
+                            else startFinalRound();
                             else triggerAlert("not perfect yet!");
                         }
                     }
                     else document.querySelector(".review-next").classList.add("active");
                     score_allowed = true;
-                }, delay + 500);
+                }, delay + 600);
             }
         }
 
@@ -1523,32 +1524,6 @@
             ref(my_lobby_path + "members/" + my_id + "/data/tiles").set(blobifyTiles());
         }
 
-        // restore connection
-        ref(my_lobby_path + "members/" + my_id + "/data/tiles").once("value").then((snapshot) => {
-            if (snapshot.exists()) {
-                restoreTilesFromBlob(snapshot.val());
-                triggerAlert("connection restored!");
-                ref(my_data_path + "draws_received").once("value").then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const draws_received = snapshot.val();
-                        ref(my_data_path + "draw_history").once("value").then((snapshot) => {
-                            if (snapshot.exists()) {
-                                const draw_history = Object.values(snapshot.val());
-                                const intended_draws_received = draw_history.length;
-                                if (draws_received < intended_draws_received) {
-                                    const draws_to_add = draw_history.slice(draws_received);
-                                    for (const draw of draws_to_add) createTileRow(draw.split(""), false);
-                                    ref(my_data_path + "draws_received").set(intended_draws_received);
-                                    recenterTiles();
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            else if (my_type == "host" || my_id == "0") assignDraws(7, true);
-        });
-
         function onRefUpdate(r, callback = () => {}) {
             var ct = 0;
             const l = r.on("value", (snapshot) => {
@@ -1559,87 +1534,16 @@
             });
         }
 
-        function setTimer(delay = auto_draw_delay) {
+        function setTimer(delay = auto_draw_delay, callback = () => assignDraws(2, false, true)) {
             if (draw_timeout) clearTimeout(draw_timeout);
             draw_timeout = setTimeout(() => {
                 if (!final_round) {
-                    assignDraws(2, false, true);
+                    callback();
                     setTimer();
                 }
             }, delay);
             draw_start_date = new Date(new Date().getTime() - (auto_draw_delay - delay));
         }
-
-        // on someone draws
-        var ct = 0;
-        ref(my_data_path + "draw").on("value", (snapshot) => {
-            if (snapshot.exists()) {
-                const letters = snapshot.val().split("");
-                if (ct++ > 0) {
-                    ref(my_lobby_data_path + "drawer").once("value").then((snapshot) => {
-                        const drawer = snapshot.val();
-                        var twerp = true;
-                        if (drawer) {
-                            if (drawer != "initial" && drawer != my_name && drawer != "auto") {
-                                triggerAlert(drawer + " just forced a draw!");
-                                twerp = false;
-                            }
-                            else if (drawer == "auto") {
-                                triggerAlert("everyone given a helping hand");
-                                twerp = false;
-                            }
-                        }
-                        if (my_type == "host") setTimer();
-                        createTileRow(letters, twerp);
-                        ref(my_data_path + "draws_received").transaction((post) => {
-                            if (post) return post + 1;
-                            else return 1;
-                        });
-                    });
-                }
-                else if (Object.keys(tiles).length == 0) createTileRow(letters, true);
-            }
-        });
-
-        // on draw date update
-        var cdt = 0;
-        ref(my_lobby_data_path + "last_draw_date").on("value", (snapshot) => {
-            if (snapshot.exists()) {
-                if (cdt++ == 0 && my_type == "host") {
-                    const time_difference = new Date() - new Date(snapshot.val());
-                    if (time_difference >= auto_draw_delay) {
-                        assignDraws(2, false, true);
-                        setTimer();
-                    }
-                    else setTimer(auto_draw_delay - time_difference);
-                }
-                else draw_start_date = new Date(snapshot.val());
-            }
-        });
-
-        // on final round declaration
-        ref(my_lobby_data_path + "final_round").on("value", (snapshot) => {
-            if (snapshot.val()) {
-                ref(my_lobby_data_path + "winner_id").once("value").then((snapshot) => {
-                    if (!snapshot.val()) {
-                        final_round = true;
-                        triggerProgressMessage("final-round-msg");
-                        const sumbit_btn = document.querySelector(".submit-btn");
-                        sumbit_btn.style.transition = "transform 0.5s ease, opacity 0.5s ease"
-                        console.log(sumbit_btn.style.transition);
-                        setTimeout(() => sumbit_btn.classList.add("hidden"), 100);
-                        setTimeout(() => {
-                            sumbit_btn.classList.add("final-round");
-                            sumbit_btn.querySelector("span").innerText = "finish!";
-                            sumbit_btn.classList.remove("hidden");
-                        }, 600);
-                        setTimeout(() => sumbit_btn.style.transition = "", 700);
-                        document.getElementById("timer").style.display = "none";
-                        if (draw_timeout) clearTimeout(draw_timeout);
-                    }
-                });
-            }
-        });
 
         function displayBoard(t_blob) {
             clearTiles();
@@ -1654,51 +1558,160 @@
             document.querySelector(".review-next").classList.remove("active");
         }
 
-        // on winner declaration
-        var blob_i = 0;
-        var t_blobs = [];
-        ref(my_lobby_data_path + "winner_id").on("value", (snapshot) => {
-            const winner_id = snapshot.val();
-            if (winner_id) {
-                lockTiles();
-                triggerProgressMessage("game-over-msg");
-                game_over = true;
-                document.querySelector(".submit-btn").classList.add("hidden");
-                document.getElementById("timer").classList.add("hidden");
-                document.getElementById("score").classList.add("hidden");
-                if (draw_timeout) clearTimeout(draw_timeout);
-                clearTiles();
-                setTimeout(() => {
-                    setTimeout(() => document.querySelector(".review-header").classList.add("active"), 200);
-                    ref(my_lobby_path + "members").once("value").then((snapshot) => {
-                        const members = snapshot.val();
-                        for (const [mid, mem] of Object.entries(members)) {
-                            const blob = mem.data.tiles;
-                            const is_winner = mid == winner_id;
-                            if (blob) {
-                                const t_blob = {
-                                    name: mem.name,
-                                    blob,
-                                    winner: is_winner
-                                }
-                                if (is_winner) t_blobs.unshift(t_blob);
-                                else t_blobs.push(t_blob);
-                            }
-                        }
-                        displayBoard(t_blobs[0]);
-                    });
-                }, 2000);
-            }
-        });
-
-        const start_date = new Date();
-        if (my_type == "classic") {
-            assignDraws(7);
-            setTimer();
+        function startFinalRound() {
+            final_round = true;
+            triggerProgressMessage("final-round-msg");
+            const sumbit_btn = document.querySelector(".submit-btn");
+            sumbit_btn.style.transition = "transform 0.5s ease, opacity 0.5s ease"
+            console.log(sumbit_btn.style.transition);
+            setTimeout(() => sumbit_btn.classList.add("hidden"), 100);
+            setTimeout(() => {
+                sumbit_btn.classList.add("final-round");
+                sumbit_btn.querySelector("span").innerText = "finish!";
+                sumbit_btn.classList.remove("hidden");
+            }, 600);
+            setTimeout(() => sumbit_btn.style.transition = "", 700);
+            document.getElementById("timer").style.display = "none";
+            if (draw_timeout) clearTimeout(draw_timeout);
         }
+
+        if (my_type != "classic") {
+            // restore connection
+            ref(my_lobby_path + "members/" + my_id + "/data/tiles").once("value").then((snapshot) => {
+                if (snapshot.exists()) {
+                    restoreTilesFromBlob(snapshot.val());
+                    triggerAlert("connection restored!");
+                    ref(my_data_path + "draws_received").once("value").then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const draws_received = snapshot.val();
+                            ref(my_data_path + "draw_history").once("value").then((snapshot) => {
+                                if (snapshot.exists()) {
+                                    const draw_history = Object.values(snapshot.val());
+                                    const intended_draws_received = draw_history.length;
+                                    if (draws_received < intended_draws_received) {
+                                        const draws_to_add = draw_history.slice(draws_received);
+                                        for (const draw of draws_to_add) createTileRow(draw.split(""), false);
+                                        ref(my_data_path + "draws_received").set(intended_draws_received);
+                                        recenterTiles();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+                else if (my_type == "host" || my_id == "0") assignDraws(7, true);
+            });
+
+            // on someone draws
+            var ct = 0;
+            ref(my_data_path + "draw").on("value", (snapshot) => {
+                if (snapshot.exists()) {
+                    const letters = snapshot.val().split("");
+                    if (ct++ > 0) {
+                        ref(my_lobby_data_path + "drawer").once("value").then((snapshot) => {
+                            const drawer = snapshot.val();
+                            var twerp = true;
+                            if (drawer) {
+                                if (drawer != "initial" && drawer != my_name && drawer != "auto") {
+                                    triggerAlert(drawer + " just forced a draw!");
+                                    twerp = false;
+                                }
+                                else if (drawer == "auto") {
+                                    triggerAlert("everyone given a helping hand");
+                                    twerp = false;
+                                }
+                            }
+                            if (my_type == "host") setTimer();
+                            createTileRow(letters, twerp);
+                            ref(my_data_path + "draws_received").transaction((post) => {
+                                if (post) return post + 1;
+                                else return 1;
+                            });
+                        });
+                    }
+                    else if (Object.keys(tiles).length == 0) createTileRow(letters, true);
+                }
+            });
+
+            // on draw date update
+            var cdt = 0;
+            ref(my_lobby_data_path + "last_draw_date").on("value", (snapshot) => {
+                if (snapshot.exists()) {
+                    if (cdt++ == 0 && my_type == "host") {
+                        const time_difference = new Date() - new Date(snapshot.val());
+                        if (time_difference >= auto_draw_delay) {
+                            assignDraws(2, false, true);
+                            setTimer();
+                        }
+                        else setTimer(auto_draw_delay - time_difference);
+                    }
+                    else draw_start_date = new Date(snapshot.val());
+                }
+            });
+
+            // on final round declaration
+            ref(my_lobby_data_path + "final_round").on("value", (snapshot) => {
+                if (snapshot.val()) {
+                    ref(my_lobby_data_path + "winner_id").once("value").then((snapshot) => {
+                        if (!snapshot.val()) startFinalRound();
+                    });
+                }
+            });
+            
+            // on winner declaration
+            var blob_i = 0;
+            var t_blobs = [];
+            ref(my_lobby_data_path + "winner_id").on("value", (snapshot) => {
+                const winner_id = snapshot.val();
+                if (winner_id) {
+                    lockTiles();
+                    triggerProgressMessage("game-over-msg");
+                    game_over = true;
+                    document.querySelector(".submit-btn").classList.add("hidden");
+                    document.getElementById("timer").classList.add("hidden");
+                    document.getElementById("score").classList.add("hidden");
+                    if (draw_timeout) clearTimeout(draw_timeout);
+                    clearTiles();
+                    setTimeout(() => {
+                        setTimeout(() => document.querySelector(".review-header").classList.add("active"), 200);
+                        ref(my_lobby_path + "members").once("value").then((snapshot) => {
+                            const members = snapshot.val();
+                            for (const [mid, mem] of Object.entries(members)) {
+                                const blob = mem.data.tiles;
+                                const is_winner = mid == winner_id;
+                                if (blob) {
+                                    const t_blob = {
+                                        name: mem.name,
+                                        blob,
+                                        winner: is_winner
+                                    }
+                                    if (is_winner) t_blobs.unshift(t_blob);
+                                    else t_blobs.push(t_blob);
+                                }
+                            }
+                            displayBoard(t_blobs[0]);
+                        });
+                    }, 2000);
+                }
+            });
+        }
+
+        const classic_timed = false;
+        const start_date = new Date();
+        const classic_timer_callback = () => {
+            createTileRow(ndraw(deck, 2));
+            triggerAlert("given a helping hand!");
+        }
+        if (my_type == "classic") {
+            createInitialDeck(1);
+            const initial_draw = ndraw(deck, 7).join("").replaceAll("Q", "A").replaceAll("Z", "D").replaceAll("X", "B").replaceAll("Y", "I").replaceAll("J", "T").split("");
+            setTimeout(() => createTileRow(initial_draw), 500);
+            setTimer(auto_draw_delay, classic_timer_callback);
+        }
+
         setInterval(() => {
-            // if (my_type == "classic") var total_seconds = (new Date() - start_date) / 1000;
             var total_seconds = (auto_draw_delay - (new Date() - draw_start_date))/1000;
+            if (my_type == "classic" && !classic_timed) var total_seconds = (new Date() - start_date) / 1000;
             const mins = Math.max(0, Math.floor(total_seconds / 60));
             const secs = Math.max(0, Math.floor(total_seconds % 60));
             const text = mins + ":" + (secs < 10 ? "0" : "") + secs;
