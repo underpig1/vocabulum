@@ -1614,7 +1614,7 @@
                                 if (my_type == "classic") onClassicWin();
                                 else ref(my_lobby_data_path + "winner_id").set(my_id);
                             }
-                            else triggerAlert("need to finish deck first!");
+                            else triggerAlert("all words must be valid before drawing!");
                         }
                         else {
                             if (all_valid) {
@@ -1630,7 +1630,7 @@
                                 if (deck.length >= 2) setTimer(auto_draw_delay, classic_timer_callback);
                                 else startFinalRound();
                             }
-                            else triggerAlert("need to finish deck first!");
+                            else triggerAlert("all words must be valid before drawing!");
                         }
                     }
                     else document.querySelector(".review-next").classList.add("active");
@@ -1769,7 +1769,7 @@
                     for (const mid of Object.keys(post)) post[mid].data = {};
                     return post;
                 }
-            })
+            });
             ref(my_lobby_data_path).set({});
             ref(my_lobby_path + "locked").set(false);
             ref(my_lobby_path + "initial_drawn").set(false);
@@ -1802,7 +1802,7 @@
                     assignDraws(7, true);
                     ref(my_lobby_path + "initial_drawn").set(true);
                 }
-            })
+            });
             ref(my_lobby_path + "members/" + my_id + "/data/tiles").once("value").then((snapshot) => {
                 if (snapshot.exists()) {
                     restoreTilesFromBlob(snapshot.val());

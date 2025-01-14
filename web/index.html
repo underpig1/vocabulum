@@ -1041,6 +1041,10 @@
             .join-modal-content-2 label {
                 margin-top: 20px !important;
             }
+            
+            .host-modal-content .ready:hover {
+                transform: translate(5px, -1px) scale(1.1);
+            }
         }
 
         @media only screen and (max-width: 700px), only screen and (max-height: 600px) { /* size adjustments */
@@ -1143,8 +1147,8 @@
 
         .notify-msg {
             position: absolute;
-            top: 135px;
-            right: 85px;
+            top: 50px;
+            right: 50px;
             display: flex;
             line-height: 60px;
             flex-direction: row;
@@ -1209,6 +1213,11 @@
                 border-radius: 15px;
             }
         }
+
+        a {
+            color: unset;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -1217,7 +1226,7 @@
     <div class="nav">
         <image class="icon" src="img/icon.png" style="width: 200px"></image>
         <div class="links">
-            <h2>more projects</h2>
+            <a href="https://github.com/underpig1"><h2>more projects</h2></a>
         </div>
     </div>
     <div class="content">
@@ -1294,26 +1303,6 @@
                 <label class="member-count">1 member</label>
                 <label class="waiting-msg" style="position: absolute; left: 0; right: 0; width: max-content; top: 0; bottom: 0; margin: auto; height: max-content;">waiting for players to join...</label>
                 <div class="member-grid">
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy21</p>
-                        <img class="member-remove" src="img/x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="img/x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="img/x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="img/x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="img/x.png"></img>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1356,26 +1345,6 @@
             <div class="group-members">
                 <label class="member-count">1 member</label>
                 <div class="member-grid">
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy21</p>
-                        <img class="member-remove" src="x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
-                    </div>
-                    <div class="member">
-                        <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1476,7 +1445,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll("input[type='text']").forEach((input) => {
                 input.addEventListener("blur", (e) => {
-                    console.log("blurring");
                     setTimeout(() => {
                         window.scrollTo(0, 0);
                         document.body.style.zoom = 1.0;
@@ -1506,6 +1474,7 @@
                 });
                 firebase.database().ref("lobbies/" + my_lobby + "/locked").set(false);
                 firebase.database().ref("lobbies/" + my_lobby + "/start").set(false);
+                firebase.database().ref("lobbies/" + my_lobby + "/initial_drawn").set(false);
             }
             if (type == "join") {
                 document.querySelector(".content").classList.add("active");
@@ -1688,9 +1657,9 @@
             const container = document.querySelector(`.${type}-modal .member-grid`);
             container.innerHTML = "";
             const waiting = document.querySelector(`.${type}-modal .waiting-msg`);
-            const mem_count = Object.keys(members).length;
+            const mem_count = members ? Object.keys(members).length : 0;
             document.querySelector(`.${type}-modal .member-count`).innerText = `${mem_count} member${mem_count == 1 ? "" : "s"}`;
-            if (Object.keys(members).length == 0) type == "host" ? waiting.classList.add("active") : null;
+            if (mem_count == 0) type == "host" ? waiting.classList.add("active") : null;
             else {
                 if (type == "host") waiting.classList.remove("active");
                 for (var member of Object.keys(members)) {
@@ -1711,7 +1680,7 @@
                     container.appendChild(el);
                 }
             }
-            if (Object.keys(members).length == 1 && type == "host") document.querySelector(".host-modal-content .ready").style.opacity = 0.5;
+            if (mem_count == 1 && type == "host") document.querySelector(".host-modal-content .ready").style.opacity = 0.5;
             else document.querySelector(".host-modal-content .ready").style.opacity = 1;
         }
 
@@ -2042,14 +2011,14 @@
         document.addEventListener("DOMContentLoaded", (e) => {
             window.onresize();
             setGridPos(anchor_pos);
-            var interval = setInterval(updateHeroWord, 3000);
+            interval = setInterval(updateHeroWord, 3000);
             updateHeroWord();
         });
 
         function resetTiles() {
-            clearInterval(interval);
+            if (interval) clearInterval(interval);
             deleteAllTiles();
-            if (interval) interval = setInterval(updateHeroWord, 3000);
+            interval = setInterval(updateHeroWord, 3000);
             updateHeroWord();
         }
     </script>
@@ -2186,11 +2155,12 @@
             }));
         }
 
-        var stc = 0;
         function startListeningToStart() {
-            firebase.database().ref("lobbies/" + my_lobby + "/start").on("value", ((snapshot) => {
-                if (snapshot.val() && stc++ > 0) redirect("join");
-            }));
+            firebase.database().ref("lobbies/" + my_lobby + "/start").once("value").then((snapshot) => {
+                if (!snapshot.val()) firebase.database().ref("lobbies/" + my_lobby + "/start").on("value", ((snapshot) => {
+                    if (snapshot.val()) redirect("join");
+                }));
+            });
         }
 
         function startListeningToKick() {
@@ -2262,7 +2232,6 @@
         }
 
         function abandonLobby() {
-            console.log("abandoned");
             if (my_lobby != 0) firebase.database().ref("lobbies/" + my_lobby).remove();
         }
 
