@@ -178,7 +178,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url(background.png);
+            background: url("img/background.png");
             background-position: 100% center;
             background-repeat: no-repeat;
             pointer-events: none;
@@ -663,7 +663,7 @@
             top: -150px;
             right: -350px;
             bottom: -350px;
-            background-image: url(skew_background.png);
+            background-image: url("img/skew_background.png");
             background-position: bottom right;
             background-repeat: no-repeat;
             pointer-events: none;
@@ -855,7 +855,7 @@
 
         .member-count::before {
             content: "";
-            background-image: url(member.png);
+            background-image: url("img/member.png");
             display: inline-block;
             width: 15px;
             height: 16px;
@@ -1139,7 +1139,6 @@
             right: 0;
             bottom: 0;
             z-index: 3;
-            display: none;
         }
 
         .notify-msg {
@@ -1216,7 +1215,7 @@
 <body>
     <div id="background"></div>
     <div class="nav">
-        <image class="icon" src="icon.png" style="width: 200px"></image>
+        <image class="icon" src="img/icon.png" style="width: 200px"></image>
         <div class="links">
             <h2>more projects</h2>
         </div>
@@ -1270,7 +1269,7 @@
             <text class="text-stroke" x="5" y="42"><</text>
         </svg>
         <div class="loading-msg loaded">
-            <image class="spinner" src="spinner.png"></image>
+            <image class="spinner" src="img/spinner.png"></image>
             <h1>creating your group</h1>
         </div>
         <div class="host-modal-content">
@@ -1287,7 +1286,7 @@
                     <span></span>
                     <p>private group</p>
                 </label>
-                <svg class="header ready" viewBox="0 0 232 70" onclick="startHostGame()">
+                <svg class="header ready" viewBox="0 0 232 70" onclick="startHostGame(this)">
                     <text class="text-stroke" x="10" y="55">START <tspan>&#62;</tspan></text>
                 </svg>
             </div>
@@ -1297,23 +1296,23 @@
                 <div class="member-grid">
                     <div class="member">
                         <p class="member-name">SpaceCowboy21</p>
-                        <img class="member-remove" src="x.png"></img>
+                        <img class="member-remove" src="img/x.png"></img>
                     </div>
                     <div class="member">
                         <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
+                        <img class="member-remove" src="img/x.png"></img>
                     </div>
                     <div class="member">
                         <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
+                        <img class="member-remove" src="img/x.png"></img>
                     </div>
                     <div class="member">
                         <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
+                        <img class="member-remove" src="img/x.png"></img>
                     </div>
                     <div class="member">
                         <p class="member-name">SpaceCowboy22</p>
-                        <img class="member-remove" src="x.png"></img>
+                        <img class="member-remove" src="img/x.png"></img>
                     </div>
                 </div>
             </div>
@@ -1342,7 +1341,7 @@
             </svg>
         </div>
         <div class="loading-msg">
-            <image class="spinner" src="spinner.png"></image>
+            <image class="spinner" src="img/spinner.png"></image>
             <h1>connecting...</h1>
         </div>
         <div class="join-modal-content-3">
@@ -1382,7 +1381,7 @@
         </div>
     </div>
     <div class="notify-msg">
-        <div></div><img src="alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span>
+        <div></div><img src="img/alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span>
     </div>
     <div class="alert">
         <span></span>
@@ -1406,6 +1405,11 @@
         const rrange = (a, b) => Math.random()*(b - a) + a
         const slicel = (a, b, size, i) => [Math.max(a, a + (b-a)*i - size/2), Math.min(a + (b-a)*i + size/2, b)];
         set_canvas_size();
+
+        window.addEventListener("pageshow", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = "none";
+        });
 
         function startOverlayAnimation() {
             var rects = [];
@@ -1461,7 +1465,9 @@
             document.getElementById("overlay").style.display = "block";
             setTimeout(startOverlayAnimation, 200);
             setTimeout(() => {
-                window.location.href = `main.html?t=${type}&id=${my_id}&n=${my_name}&l=${my_lobby}`;
+                setURLSearchParams(type);
+                // window.location.href = `main.html?t=${type}&id=${my_id}&n=${my_name}&l=${my_lobby}`;
+                window.location.href = "main.html";
             }, 1500);
         }
     </script>
@@ -1480,13 +1486,44 @@
         });
     </script>
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // const params = new URLSearchParams(window.location.href.split("?")[1]);
+            const type = sessionStorage.getItem("t");
+            my_id = sessionStorage.getItem("id");
+            my_name = sessionStorage.getItem("n");
+            my_lobby = sessionStorage.getItem("l");
+            if (type == "host") {
+                clearInterval(interval);
+                document.querySelector(".content").classList.add("active");
+                document.querySelector(".host-modal").classList.add("active");
+                document.querySelector(".host-modal .host-modal-content").classList.add("active");
+                document.querySelector(".host-modal .host-modal-content").style.display = "block";
+                onLobbyCreated(true);
+                firebase.database().ref("lobbies/" + my_lobby + "/data").set("");
+                firebase.database().ref("lobbies/" + my_lobby + "/members").transaction((post) => {
+                    for (const member of Object.values(post)) member.data = {};
+                    return post;
+                });
+                firebase.database().ref("lobbies/" + my_lobby + "/locked").set(false);
+                firebase.database().ref("lobbies/" + my_lobby + "/start").set(false);
+            }
+            if (type == "join") {
+                document.querySelector(".content").classList.add("active");
+                document.querySelector(".join-modal").classList.add("active");
+                document.querySelector(".join-modal-content").classList.add("active");
+                document.querySelector(".join-modal .loading-msg").classList.add("active");
+                document.querySelector(".join-modal-content-2").classList.remove("active");
+                firebase.database().ref("lobbies/" + my_lobby + "/members").once("value").then((snapshot) => onJoinConnect(snapshot.val()));
+            }
+        });
+
         var join_code_valid = false;
 
         function startClassic() {
             redirect("classic");
         }
 
-        function startHost() {
+        function startHost(restore = false) {
             clearInterval(interval);
             document.querySelector(".content").classList.add("active");
             document.querySelector(".host-modal").classList.add("active");
@@ -1513,9 +1550,11 @@
         }
 
         function exitModal(type) {
+            resetStorage();
             document.querySelector(".content").classList.remove("active");
             document.querySelector(".host-modal").classList.remove("active");
             document.querySelector(".join-modal").classList.remove("active");
+            history.replaceState(null, "", window.location.pathname);
             deleteAllTiles();
             setTimeout(resetTiles, 300);
             if (type == "host") setTimeout(abandonLobby, 300);
@@ -1529,15 +1568,37 @@
             }, 300);
         }
 
-        function onLobbyCreated() {
+        function setURLSearchParams(type = "join") {
+            // const url = new URL(window.location);
+            // url.searchParams.set("t", type);
+            // url.searchParams.set("id", type == "host" ? 0 : my_id);
+            // url.searchParams.set("n", my_name);
+            // url.searchParams.set("l", my_lobby);
+            // window.history.pushState({}, "", url);
+            sessionStorage.setItem("t", type);
+            sessionStorage.setItem("id", type == "host" ? 0 : my_id);
+            sessionStorage.setItem("n", my_name);
+            sessionStorage.setItem("l", my_lobby);
+        }
+
+        function resetStorage() {
+            sessionStorage.setItem("t", null);
+            sessionStorage.setItem("id", null);
+            sessionStorage.setItem("n", null);
+            sessionStorage.setItem("l", null);
+        }
+
+        function onLobbyCreated(restore = false) {
             document.querySelector(".host-modal .loading-msg").classList.add("loaded");
             document.querySelector(".host-modal .host-modal-content").style.display = "flex";
             document.getElementById("group-code").textContent = my_lobby;
-            my_name = createUsername();
+            document.querySelector(".host-modal-content .ready").style.opacity = 0.5;
+            if (!restore) my_name = createUsername();
             updateHostName(null, my_name);
             document.getElementById("host-name").value = my_name;
             setTimeout(() => document.querySelector(".host-modal .host-modal-content").classList.add("active"), 500);
             startListeningToMembers("host");
+            setURLSearchParams("host");
         }
 
         function nextJoinContent() {
@@ -1567,16 +1628,18 @@
         function startJoinFromCode(match = false) {
             if ((!match && join_code_valid) || match) {
                 document.querySelector(".join-modal-content-2").classList.remove("active");
-                setTimeout(() => document.querySelector(".join-modal .loading-msg").classList.add("active"), 200);
-                if (!match) {
-                    const code = document.getElementById("join-code").value;
-                    joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => {
-                        document.querySelector(".join-modal-content-2").classList.add("active");
-                        document.querySelector(".join-modal .loading-msg").classList.remove("active");
-                        triggerAlert("couldn't find group", false);
-                    });
-                }
-                else findMatchedLobbyCode().then((code) => joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => triggerAlert("no matches found!"))).catch(() => triggerAlert("no matches found!"));
+                setTimeout(() => {
+                    document.querySelector(".join-modal .loading-msg").classList.add("active");
+                    if (!match) {
+                        const code = document.getElementById("join-code").value;
+                        joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => {
+                            document.querySelector(".join-modal-content-2").classList.add("active");
+                            document.querySelector(".join-modal .loading-msg").classList.remove("active");
+                            triggerAlert("couldn't find group", false);
+                        });
+                    }
+                    else findMatchedLobbyCode().then((code) => joinLobbyByCode(code).then((members) => onJoinConnect(members)).catch(() => triggerAlert("no matches found!"))).catch(() => triggerAlert("no matches found!"));
+                }, 200);
             }
         }
 
@@ -1601,8 +1664,8 @@
                 alert_close_timeout = setTimeout(() => document.querySelector(".notify-msg").classList.remove("active"), 3000);
             }, 100);
             if (exit) {
-                exitModal("host");
-                exitModal("join");
+                if (document.querySelector(".join-modal").classList.contains("active")) exitModal("join");
+                else if (document.querySelector(".host-modal").classList.contains("active")) exitModal("host");
             }
         }
 
@@ -1611,13 +1674,14 @@
             document.querySelector(".join-modal-content").classList.add("active");
             document.querySelector(".join-modal-content-2").classList.remove("active");
             setTimeout(() => document.querySelector(".join-modal-content-3").classList.add("active"), 200);
-            document.querySelector(".join-modal .loading-msg").classList.remove("active");
             createMembers("join", members);
             connected = true;
             document.querySelector(".join-modal .group-code .text-stroke").textContent = my_lobby;
             startListeningToMembers("join");
             startListeningToAbandoned();
             startListeningToStart();
+            startListeningToKick();
+            setURLSearchParams("join");
         }
 
         function createMembers(type = "join", members = {}) {
@@ -1639,7 +1703,7 @@
                     const img = document.createElement("img");
                     img.setAttribute("mid", member);
                     img.classList.add("member-remove");
-                    img.src = "x.png";
+                    img.src = "img/x.png";
                     img.setAttribute("onclick", "removeMember(this)");
                     if (type == "host") {
                         if (member != 0) el.appendChild(img);
@@ -1647,11 +1711,15 @@
                     container.appendChild(el);
                 }
             }
+            if (Object.keys(members).length == 1 && type == "host") document.querySelector(".host-modal-content .ready").style.opacity = 0.5;
+            else document.querySelector(".host-modal-content .ready").style.opacity = 1;
         }
 
         function removeMember(el) {
             const mid = el.getAttribute("mid");
-            firebase.database().ref("lobbies/" + my_lobby + "/members/" + mid).remove();
+            firebase.database().ref("lobbies/" + my_lobby + "/members/" + mid).once("value").then((snapshot) => {
+                if (snapshot.exists()) firebase.database().ref("lobbies/" + my_lobby + "/members/" + mid).remove();
+            });
         }
     </script>
     <script>
@@ -2103,23 +2171,36 @@
 
         function startListeningToMembers(type = "join") {
             firebase.database().ref("lobbies/" + my_lobby + "/members").on("value", ((snapshot) => {
-                const members = snapshot.val();
+                var members = snapshot.val();
+                //members = Object.fromEntries(Object.entries(members).filter(([mid]) => mid != my_id));
                 createMembers(type, members);
             }));
         }
 
         function startListeningToAbandoned() {
             firebase.database().ref("lobbies/" + my_lobby).on("value", ((snapshot) => {
-                if (snapshot.val() == null) exitModal("join");
+                if (!snapshot.exists()) {
+                    exitModal("join");
+                    triggerAlert("disconnected from group", false);
+                }
             }));
         }
 
+        var stc = 0;
         function startListeningToStart() {
             firebase.database().ref("lobbies/" + my_lobby + "/start").on("value", ((snapshot) => {
-                if (snapshot.val()) redirect("join");
+                if (snapshot.val() && stc++ > 0) redirect("join");
             }));
         }
 
+        function startListeningToKick() {
+            firebase.database().ref("lobbies/" + my_lobby + "/members").on("child_removed", ((snapshot) => {
+                if (snapshot.key == my_id) {
+                    exitModal("join");
+                    triggerAlert("disconnected from group", false);
+                }
+            }));
+        }
 
         function collectOldLobbies(lobbies) {
             if (lobbies) {
@@ -2181,6 +2262,7 @@
         }
 
         function abandonLobby() {
+            console.log("abandoned");
             if (my_lobby != 0) firebase.database().ref("lobbies/" + my_lobby).remove();
         }
 
@@ -2188,10 +2270,12 @@
             if (my_lobby) firebase.database().ref("lobbies/" + my_lobby + "/private").set(e.target.checked);
         }
 
-        function startHostGame() {
-            firebase.database().ref("lobbies/" + my_lobby + "/start").set(true);
-            firebase.database().ref("lobbies/" + my_lobby + "/locked").set(true);
-            redirect("host");
+        function startHostGame(el) {
+            if (el.style.opacity == 1) {
+                firebase.database().ref("lobbies/" + my_lobby + "/start").set(true);
+                firebase.database().ref("lobbies/" + my_lobby + "/locked").set(true);
+                redirect("host");
+            }
         }
     </script>
 </body>

@@ -445,6 +445,7 @@
 
         .board-header {
             position: absolute;
+            display: flex;
             left: 50px;
             top: 110px;
             font-family: 'Poppins', Helvetica, sans-serif;
@@ -459,6 +460,37 @@
         .board-header.active {
             transform: none;
             opacity: 1;
+        }
+
+        .trophy {
+            --rotation: 10deg;
+            position: absolute;
+            display: none;
+            top: 50%;
+            transform: translate3d(0, -50%, 0);
+            width: 125px;
+            margin-left: 50px;
+            animation: trophy 2s ease infinite;
+        }
+
+        .trophy.active {
+            display: block;
+        }
+
+        .trophy-branch {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes trophy {
+            0% {
+                transform: translate3d(0, -50%, 0) scale(1, 1) rotate(calc(0deg - var(--rotation)));
+            }
+            50% {
+                transform: translate3d(0, -50%, 0) scale(1, 1) rotate(var(--rotation));
+            }
+            100% {
+                transform: translate3d(0, -50%, 0) scale(1, 1) rotate(calc(0deg - var(--rotation)));
+            }
         }
 
         .review-next {
@@ -571,6 +603,12 @@
                 top: 125px;
                 text-align: center;
                 font-size: 18pt;
+                justify-content: center;
+            }
+
+            .trophy {
+                margin-left: 15px;
+                width: 50px;
             }
 
             .review-header {
@@ -606,6 +644,12 @@
                 transform: translate3d(-50%, 0, 0) scale(0.8);
             }
         }
+
+        @media only screen and (max-width: 400px) {
+            .submit-btn {
+                width: calc(100% - 200px);
+            }
+        }
     </style>
 </head>
 
@@ -614,21 +658,25 @@
     <div id="tiles">
         <div id="tile-shadow" class="tile"></div>
     </div>
-    <a class="icon" href="index.html"><img src="icon.png" style="width: 200px;"></img></a>
+    <a class="icon" href="index.html"><img src="img/icon.png" style="width: 200px;"></img></a>
     <!-- <h1 class="ui timer"><span id="time-min">0</span>:<span id="time-sec">00</span></h1> -->
     <!-- <h1 class="ui score">0</h1> -->
-    <div class="notify-msg"><div></div><img src="alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span></div>
-    <button class="submit-btn control" onclick="tryDraw(this)"><img src="submit.png" style="height: 12px;"></img><span>draw</span></button>
-    <img id="recenter-btn" src="recenter.png" onclick="recenterTiles()"></img>
+    <div class="notify-msg"><div></div><img src="img/alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span></div>
+    <button class="submit-btn control" onclick="tryDraw(this)"><img src="img/submit.png" style="height: 12px;"></img><span>draw</span></button>
+    <img id="recenter-btn" src="img/recenter.png" onclick="recenterTiles()"></img>
     <h1 id="score" class="control">0</h1>
     <h1 id="timer" class="control"></h1>
-    <img id="final-round-msg" src="final_round.png" class="progress-msg"></img>
-    <img id="game-over-msg" src="game_over.png" class="progress-msg"></img>
+    <img id="final-round-msg" src="img/final_round.png" class="progress-msg"></img>
+    <img id="game-over-msg" src="img/game_over.png" class="progress-msg"></img>
     <h1 class="review-header">Let's see how everyone did...</h1>
-    <h1 class="board-header"><span>SlickPossum18</span>'s deck</h1>
+    <h1 class="board-header"><span>SlickPossum18</span>'s deck
+        <div id="trophy">
+            <img class="trophy trophy-branch" src="img/trophy_branches.png"></img>
+            <img class="trophy" src="img/single_trophy.png"></img>
+        </div>
+    </h1>
     <h1 id="review-score">0</h1>
-    <img class="review-next" src="next.png" onclick="reviewNext()"></img>
-    <img class="review-exit" src="exit.png" onclick="reviewExit()"></img>
+    <img class="review-next" src="img/next.png" onclick="reviewNext()"></img>
     <!-- <div class="ui take-2" onclick="verifyTiles(tiles);">
         <div class="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -703,15 +751,22 @@
 
         fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split("\r\n"));
 
-        document.querySelectorAll(".tile").forEach((el) => {
-            el.addEventListener("click", (e) => triggerAlert("touch"));
-        });
+        // document.querySelectorAll(".tile").forEach((el) => {
+        //     el.addEventListener("click", (e) => triggerAlert("touch"));
+        // });
 
         document.ontouchstart = (e) => {
             const touch = e.touches[0];
             if (touch) {
-                if (touch.target.classList.contains("tile") && !tiles_locked) {
-                    target = touch.target;
+                var override = false;
+                document.elementsFromPoint(touch.pageX, touch.pageY).forEach((el) => {
+                    if (el.classList.contains("tile")) {
+                        override = true;
+                        target = el;
+                    }
+                })
+                if ((touch.target.classList.contains("tile") || override) && !tiles_locked) {
+                    if (!override) target = touch.target;
                     target_initial_position = tiles[target.getAttribute("tid")].position;
                     tile_shadow.style.opacity = 1;
                     target.style.zIndex = 3;
@@ -1085,7 +1140,7 @@
                         ease: "power4.out"
                     });
                 }
-                setTimeout(() => document.body.removeChild(copy), 1500);
+                setTimeout(() => document.body.removeChild(copy), 1200);
             }, delay);
         }
 
@@ -1426,11 +1481,11 @@
         };
         var ref = (r) => firebase.database().ref(r);
 
-        const params = new URLSearchParams(window.location.href.split("?")[1]);
-        const my_type = params.get("t");
-        const my_id = params.get("id");
-        const my_name = params.get("n");
-        const my_lobby = params.get("l");
+        //const params = new URLSearchParams(window.location.href.split("?")[1]);
+        const my_type = sessionStorage.getItem("t");
+        const my_id = sessionStorage.getItem("id");
+        const my_name = sessionStorage.getItem("n");
+        const my_lobby = sessionStorage.getItem("l");
 
         const my_lobby_path = "lobbies/" + my_lobby + "/";
         const my_lobby_data_path = my_lobby_path + "data/";
@@ -1459,12 +1514,14 @@
             setTimeout(() => msg.classList.remove("active"), delay);
         }
 
-        function triggerBoardHeader(name) {
+        function triggerBoardHeader(name, trophy = false) {
             const board_header = document.querySelector(".board-header");
             const review_score = document.getElementById("review-score");
             board_header.classList.remove("active");
             review_score.classList.remove("active");
             setTimeout(() => {
+                if (trophy) document.querySelectorAll(".trophy").forEach((el) => el.classList.add("active"));
+                else document.querySelectorAll(".trophy").forEach((el) => el.classList.remove("active"));
                 board_header.querySelector("span").innerText = name;
                 setTimeout(() => review_score.innerText = "0", 100);
                 board_header.classList.add("active");
@@ -1518,9 +1575,9 @@
                         all_valid = false;
                         score -= words[i].word.length;
                     }
+                    else score += getWordScore(words[i].word);
                     var vert = null;
                     if (words[i].tiles.length > 1) var vert = words[i].tiles[0].position[0] == words[i].tiles[1].position[0];
-                    else score += getWordScore(words[i].word);
                     for (var j = 0; j < words[i].tiles.length; j++) {
                         const tile = words[i].tiles[j];
                         const radius = tile_size / 5;
@@ -1557,7 +1614,7 @@
                                 if (my_type == "classic") onClassicWin();
                                 else ref(my_lobby_data_path + "winner_id").set(my_id);
                             }
-                            else triggerAlert("not perfect yet!");
+                            else triggerAlert("need to finish deck first!");
                         }
                         else {
                             if (all_valid) {
@@ -1573,7 +1630,7 @@
                                 if (deck.length >= 2) setTimer(auto_draw_delay, classic_timer_callback);
                                 else startFinalRound();
                             }
-                            else triggerAlert("not perfect yet!");
+                            else triggerAlert("need to finish deck first!");
                         }
                     }
                     else document.querySelector(".review-next").classList.add("active");
@@ -1611,6 +1668,7 @@
                     }
                     ref(my_lobby_data_path + "last_draw_date").set(new Date().toISOString());
                     ref(my_lobby_data_path + "deck").set(deck.join(""));
+                    onTilesUpdate();
 
                     if (deck.length < mem_count*2) {
                         ref(my_lobby_data_path + "final_round").set(true);
@@ -1644,7 +1702,7 @@
         }
 
         function onTilesUpdate() {
-            ref(my_lobby_path + "members/" + my_id + "/data/tiles").set(blobifyTiles());
+            if (my_type != "classic") ref(my_lobby_path + "members/" + my_id + "/data/tiles").set(blobifyTiles());
         }
 
         function onRefUpdate(r, callback = () => {}) {
@@ -1670,17 +1728,19 @@
 
         function displayBoard(t_blob) {
             clearTiles();
-            triggerBoardHeader(t_blob.name);
+            triggerBoardHeader(t_blob.name, t_blob.winner);
             setTimeout(() => restoreTilesFromBlob(t_blob.blob), 500);
             setTimeout(() => tryDraw(null, true), 1000);
         }
 
+        var blob_i = 0;
+        var t_blobs = [];
         function reviewNext() {
             if (++blob_i == t_blobs.length - 1) {
                 setTimeout(() => {
-                    document.querySelector(".review-next").src = "exit.png";
+                    document.querySelector(".review-next").src = "img/exit.png";
                     document.querySelector(".review-next").onclick = redirect;
-                    document.querySelector(".review-next").classList.add("classic");
+                    if (my_type == "classic") document.querySelector(".review-next").classList.add("classic");
                     document.querySelector(".review-next").classList.add("active");
                 }, 300);
             }
@@ -1694,7 +1754,7 @@
             triggerProgressMessage("game-over-msg");
             game_over = true;
             document.querySelector(".submit-btn").classList.add("hidden");
-            document.querySelector(".review-next").src = "exit.png";
+            document.querySelector(".review-next").src = "img/exit.png";
             document.querySelector(".review-next").onclick = redirect;
             document.querySelector(".review-next").classList.add("classic");
             document.querySelector(".review-next").classList.add("active");
@@ -1703,28 +1763,46 @@
         }
 
         function redirect() {
-
+            //window.location.href = `index.html?t=${my_type}&id=${my_id}&n=${my_name}&l=${my_lobby}`;
+            ref(my_lobby_path + "members").transaction((post) => {
+                if (post) {
+                    for (const mid of Object.keys(post)) post[mid].data = {};
+                    return post;
+                }
+            })
+            ref(my_lobby_data_path).set({});
+            ref(my_lobby_path + "locked").set(false);
+            ref(my_lobby_path + "initial_drawn").set(false);
+            ref(my_lobby_path + "start").set(false);
+            ref(my_lobby_path + "winner_id").set(null);
+            window.location.href = "index.html";
         }
 
         function startFinalRound() {
             final_round = true;
             triggerProgressMessage("final-round-msg");
             const sumbit_btn = document.querySelector(".submit-btn");
-            sumbit_btn.style.transition = "transform 0.5s ease, opacity 0.5s ease"
+            sumbit_btn.style.transition = "transform 0.3s ease, opacity 0.3s ease"
             console.log(sumbit_btn.style.transition);
             setTimeout(() => sumbit_btn.classList.add("hidden"), 100);
             setTimeout(() => {
                 sumbit_btn.classList.add("final-round");
                 sumbit_btn.querySelector("span").innerText = "finish!";
                 sumbit_btn.classList.remove("hidden");
-            }, 600);
-            setTimeout(() => sumbit_btn.style.transition = "", 700);
+            }, 300);
+            setTimeout(() => sumbit_btn.style.transition = "", 500);
             document.getElementById("timer").style.display = "none";
             if (draw_timeout) clearTimeout(draw_timeout);
         }
 
-        if (my_type != "classic") {
+        if (my_type != "classic") document.addEventListener("DOMContentLoaded", () =>  {
             // restore connection
+            if (my_type == "host" || my_id == 0) ref(my_lobby_path + "initial_drawn").once("value").then((snapshot) => {
+                if (!snapshot.exists() || !snapshot.val()) {
+                    assignDraws(7, true);
+                    ref(my_lobby_path + "initial_drawn").set(true);
+                }
+            })
             ref(my_lobby_path + "members/" + my_id + "/data/tiles").once("value").then((snapshot) => {
                 if (snapshot.exists()) {
                     restoreTilesFromBlob(snapshot.val());
@@ -1747,7 +1825,7 @@
                         }
                     });
                 }
-                else if (my_type == "host" || my_id == "0") assignDraws(7, true);
+                // else if (my_type == "host" || my_id == "0") assignDraws(7, true);
             });
 
             // on someone draws
@@ -1807,8 +1885,6 @@
             });
             
             // on winner declaration
-            var blob_i = 0;
-            var t_blobs = [];
             ref(my_lobby_data_path + "winner_id").on("value", (snapshot) => {
                 const winner_id = snapshot.val();
                 if (winner_id) {
@@ -1842,7 +1918,7 @@
                     }, 2000);
                 }
             });
-        }
+        });
 
         const classic_timed = false;
         const classic_score = false;
@@ -1850,13 +1926,13 @@
         var end_time = 0;
         const classic_timer_callback = () => {
             createTileRow(ndraw(deck, 2));
-            triggerAlert("given a helping hand!");
+            triggerAlert("given a helping hand");
         }
         if (my_type == "classic") {
             createInitialDeck(1);
             const initial_draw = ndraw(deck, 7).join("").replaceAll("Q", "A").split("");
             setTimeout(() => createTileRow(initial_draw), 500);
-            if (!classic_timed) setTimer(auto_draw_delay, classic_timer_callback);
+            if (classic_timed) setTimer(auto_draw_delay, classic_timer_callback);
         }
 
         setInterval(() => {
