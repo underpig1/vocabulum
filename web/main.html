@@ -20,9 +20,9 @@
             --tile-color: #f9be74ff;
             --font-color: #333;
 
-            --light-red: #ff9080ff;
-            --light-yellow: #f0df70ff;
-            --light-green: #80df70ff;
+            --light-red: #ff6f7bff;
+            --light-yellow: #fbd86bff;
+            --light-green: #93f46fff;
 
             touch-action: pan-x pan-y;
             height: 100%;
@@ -216,7 +216,7 @@
             animation: overlay 1s ease-out forwards;
             background-color: black;
             display: block;
-            z-index: 3;
+            z-index: 6;
         }
 
         @keyframes overlay {
@@ -233,6 +233,7 @@
             position: absolute;
             top: 35px;
             left: 50px;
+            z-index: 5;
         }
 
         .submit-btn {
@@ -262,7 +263,7 @@
             border-radius: 15px;
             cursor: pointer;
             transition: transform 0.1s ease, opacity 0.3s ease;
-            z-index: 2;
+            z-index: 5;
         }
 
         .submit-btn:hover {
@@ -345,6 +346,7 @@
             position: absolute;
             bottom: 50px;
             right: 50px;
+            z-index: 5;
         }
 
         #timer span {
@@ -414,6 +416,7 @@
             max-width: calc(100% - 100px);
             pointer-events: none;
             opacity: 0;
+            z-index: 4;
             transition: transform 0.5s ease, opacity 0.5s ease;
         }
 
@@ -482,6 +485,23 @@
 
         .review-next:active {
             transform: scale(0.8);
+        }
+
+        .review-next.classic {
+            left: 50%;
+            transform: translate3d(-50%, 0, 0) scale(0.7);
+        }
+
+        .review-next.classic.active {
+            transform: translate3d(-50%, 0, 0);
+        }
+
+        .review-next.classic:hover {
+            transform: translate3d(-50%, 0, 0) scale(0.9);
+        }
+
+        .review-next.classic:active {
+            transform: translate3d(-50%, 0, 0) scale(0.8);
         }
 
         #review-score {
@@ -574,7 +594,7 @@
                 transform: translate3d(-50%, 0, 0) scale(0.7);
             }
 
-            .review-next {
+            .review-next.active {
                 transform: translate3d(-50%, 0, 0) !important;
             }
 
@@ -608,6 +628,7 @@
     <h1 class="board-header"><span>SlickPossum18</span>'s deck</h1>
     <h1 id="review-score">0</h1>
     <img class="review-next" src="next.png" onclick="reviewNext()"></img>
+    <img class="review-exit" src="exit.png" onclick="reviewExit()"></img>
     <!-- <div class="ui take-2" onclick="verifyTiles(tiles);">
         <div class="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -618,6 +639,7 @@
         </div>
     </div> -->
     <div id="overlay"></div>
+    <!-- <script src="http://localhost:8080/target/target-script-min.js#anonymous"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script>
         var target, target_initial_position, contested_tile_position, tile_is_contested, exiled_tile;
@@ -681,6 +703,10 @@
 
         fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split("\r\n"));
 
+        document.querySelectorAll(".tile").forEach((el) => {
+            el.addEventListener("click", (e) => triggerAlert("touch"));
+        });
+
         document.ontouchstart = (e) => {
             const touch = e.touches[0];
             if (touch) {
@@ -705,11 +731,10 @@
             }
         }
         document.ontouchend = (e) => {
-            console.log(e.target);
-            if (e.target.getAttribute("id") == "background" || e.target.classList.contains("tile")) {
+            const touch = e.changedTouches[0];
+            if (touch.target.getAttribute("id") == "background" || touch.target.classList.contains("tile")) {
                 e.preventDefault();
             }
-            const touch = e.changedTouches[0];
             if (target && touch && !tiles_locked) {
                 var mouse_pos = [touch.pageX, touch.pageY];
                 var snap_pos = snapToGrid(mouse_pos);
@@ -812,6 +837,97 @@
                 setGridPos(grid_initial_position.map((c, i) => c + mouse_pos[i] - mouse_initial_position[i]));
             }
         }
+
+        // const proximity = 5;
+        // document.onmousedown = (e) => {
+        //     if (e.button == 0 && e.target.classList) {
+        //         var mouse_pos = [e.pageX, e.pageY];
+        //         function grabTile() {
+        //             target_initial_position = tiles[target.getAttribute("tid")].position;
+        //             tile_shadow.style.opacity = 1;
+        //             target.style.zIndex = 3;
+
+        //             var tid = target.getAttribute("tid");
+        //             var snap_pos = resolveGridPos(mouse_pos);
+        //             tiles[tid].position = snap_pos;
+        //             tileTwerp(target, snap_pos, 0.1);
+        //             tileTwerp(tile_shadow, snapToGrid(mouse_pos), 0);
+        //         }
+        //         if (e.target.classList.contains("tile") && !tiles_locked) {
+        //             target = e.target;
+        //             grabTile();
+        //         }
+        //         else if (e.target.getAttribute("id") == "background" && !tiles_locked) {
+        //             var nearest_tile;
+        //             var nearest_dist = Infinity;
+        //             Object.values(tiles).forEach(({ element, position }) => {
+        //                 const mp = [mouse_pos[0] - grid_pos[0], mouse_pos[1] - grid_pos[1]];
+        //                 const center = [position[0] + tile_size / 2, position[1] + tile_size / 2];
+        //                 const distance = Math.sqrt((center[0] - mp[0]) ** 2 + (center[1] - mp[1]) ** 2);
+        //                 const proximal = mp[0] >= position[0] - proximity && mp[0] <= position[0] + tile_size + proximity && mp[1] >= position[1] - proximity && mp[1] <= position[1] + tile_size + proximity;
+        //                 if (proximal && distance < nearest_dist) {
+        //                     console.log("new tile");
+        //                     nearest_tile = element;
+        //                     nearest_dist = distance;
+        //                 }
+        //             });
+        //             if (nearest_tile) {
+        //                 target = nearest_tile;
+        //                 grabTile();
+        //             }
+        //         }
+        //         if (score_allowed) {
+        //             panning = true;
+        //             mouse_initial_position = [e.pageX, e.pageY];
+        //             grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
+        //         }
+        //     }
+        // }
+        // document.ontouchstart = (e) => {
+        //     const touch = e.touches[0];
+        //     if (touch) {
+        //         var mouse_pos = [touch.pageX, touch.pageY];
+        //         function grabTile() {
+        //             target_initial_position = tiles[target.getAttribute("tid")].position;
+        //             tile_shadow.style.opacity = 1;
+        //             target.style.zIndex = 3;
+
+        //             var tid = target.getAttribute("tid");
+        //             var snap_pos = resolveGridPos(mouse_pos);
+        //             tiles[tid].position = snap_pos;
+        //             tileTwerp(target, snap_pos, 0.1);
+        //             tileTwerp(tile_shadow, snapToGrid(mouse_pos), 0);
+        //         }
+        //         if (touch.target.classList.contains("tile") && !tiles_locked) {
+        //             target = touch.target;
+        //             grabTile();
+        //         }
+        //         else if (touch.target.getAttribute("id") == "background" && !tiles_locked) {
+        //             var nearest_tile;
+        //             var nearest_dist = Infinity;
+        //             Object.values(tiles).forEach(({ element, position }) => {
+        //                 const mp = [mouse_pos[0] - grid_pos[0], mouse_pos[1] - grid_pos[1]];
+        //                 const center = [position[0] + tile_size / 2, position[1] + tile_size / 2];
+        //                 const distance = Math.sqrt((center[0] - mp[0]) ** 2 + (center[1] - mp[1]) ** 2);
+        //                 const proximal = mp[0] >= position[0] - proximity && mp[0] <= position[0] + tile_size + proximity && mp[1] >= position[1] - proximity && mp[1] <= position[1] + tile_size + proximity;
+        //                 if (proximal && distance < nearest_dist) {
+        //                     console.log("new tile");
+        //                     nearest_tile = element;
+        //                     nearest_dist = distance;
+        //                 }
+        //             });
+        //             if (nearest_tile) {
+        //                 target = nearest_tile;
+        //                 grabTile();
+        //             }
+        //         }
+        //         if (score_allowed) {
+        //             panning = true;
+        //             mouse_initial_position = [touch.pageX, touch.pageY];
+        //             grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
+        //         }
+        //     }
+        // }
 
         function lockTiles() {
             tiles_locked = true;
@@ -917,43 +1033,37 @@
             return position.map((c, i) => c - (tile_relative ? grid_pos[i] : 0) - tile_size / 2);
         }
 
-        function cloneElement(tile, delay, color = "var(--light-green)", wild = false, el = document.getElementById("score")) {
+        function cloneElement(tile, delay, color = "var(--light-green)", wild = false, el = document.getElementById("score"), border_radius) {
             setTimeout(() => {
                 const is_valid = color == "var(--light-green)";
-                var copy = tile.element.cloneNode(false);
-                Array.from(tile.element.childNodes).forEach((child) => {
-                    var should_clone = true;
-                    if (child.nodeType == 1) {
-                        if (child.tagName == "DIV") should_clone = false;
-                    }
-                    if (should_clone) copy.appendChild(child.cloneNode(true));
-                });
-                copy.style.borderRadius = tile_size / 5 + "px";
+                var copy = tile.element.cloneNode(true);
+                copy.style.borderRadius = border_radius;
                 copy.style.backgroundColor = color;
                 copy.style.boxShadow = "0 0 5px #00000033";
                 copy.style.zIndex = 4;
                 copy.style.position = "absolute";
                 document.body.appendChild(copy);
-                if (is_valid) document.body.appendChild(copy);
-                else tile.element.appendChild(copy);
-                const position = is_valid ? [tile.position[0] + grid_pos[0], tile.position[1] + grid_pos[1]] : [0, 0];
+                document.body.appendChild(copy);
+                const position = [tile.position[0] + grid_pos[0], tile.position[1] + grid_pos[1]];
                 gsap.set(copy, {
                     x: position[0],
-                    y: position[1],
+                    y: position[1]
                 });
                 gsap.to(copy, {
                     duration: 0.5,
-                    y: position[1] - tile_size/2 + Math.random()*5,
-                    ease: "power4.out"
+                    y: position[1] - tile_size/ (classic_score ? 2 : 4),
+                    ease: "power4.out",
+                    borderRadius: border_radius
                 });
                 if (is_valid) {
                     var score_ui_rect = el.getBoundingClientRect();
                     gsap.to(copy, {
                         duration: 1,
-                        delay: 0.5,
+                        delay: classic_score ? 0.5 : 0.4,
                         x: score_ui_rect.left + score_ui_rect.width / 2 - tile_size / 2 + "px",
                         y: score_ui_rect.top + score_ui_rect.height / 2 - tile_size / 2 + "px",
-                        ease: "power4.out"
+                        ease: "power4.out",
+                        borderRadius: tile_size / 5 + "px"
                     });
                     gsap.to(copy, {
                         duration: 0.5,
@@ -963,22 +1073,19 @@
                 }
                 else {
                     gsap.to(copy, {
-                        duration: 1,
+                        duration: 0.5,
                         delay: 0.5,
-                        y: position[1] - tile_size,
+                        y: position[1],
                         ease: "power4.out"
                     });
                     gsap.to(copy, {
                         duration: 0.5,
-                        delay: 1,
+                        delay: 0.75,
                         opacity: 0,
                         ease: "power4.out"
                     });
                 }
-                setTimeout(() => {
-                    if (is_valid) document.body.removeChild(copy);
-                    else tile.element.removeChild(copy);
-                }, 2000);
+                setTimeout(() => document.body.removeChild(copy), 1500);
             }, delay);
         }
 
@@ -1346,10 +1453,10 @@
 
         window.onscroll = ((e) => e.preventDefault());
 
-        function triggerProgressMessage(id) {
+        function triggerProgressMessage(id, delay = 2000) {
             const msg = document.getElementById(id);
             msg.classList.add("active");
-            setTimeout(() => msg.classList.remove("active"), 2000);
+            setTimeout(() => msg.classList.remove("active"), delay);
         }
 
         function triggerBoardHeader(name) {
@@ -1405,17 +1512,35 @@
                 var delay = 0;
                 var score = 0;
                 var all_valid = true;
+                words = words.sort((a, b) => b.valid - a.valid);
                 for (var i = 0; i < words.length; i++) {
                     if (!words[i].valid) {
                         all_valid = false;
                         score -= words[i].word.length;
                     }
+                    var vert = null;
+                    if (words[i].tiles.length > 1) var vert = words[i].tiles[0].position[0] == words[i].tiles[1].position[0];
                     else score += getWordScore(words[i].word);
                     for (var j = 0; j < words[i].tiles.length; j++) {
                         const tile = words[i].tiles[j];
-                        cloneElement(tile, delay, words[i].valid ? "var(--light-green)" : (words[i].disconnected ? "var(--light-yellow)" : "var(--light-red)"), false, score_display);
-                        delay += 50;
+                        const radius = tile_size / 5;
+                        var border_radius = `${radius}px`;
+                        if (vert != null) {
+                            if (vert) { 
+                                if (j == 0) border_radius = `${radius}px ${radius}px 0 0`;
+                                else if (j == words[i].tiles.length - 1) border_radius = `0 0 ${radius}px ${radius}px`;
+                                else border_radius = "0";
+                            }
+                            else {
+                                if (j == 0) border_radius = `${radius}px 0 0 ${radius}px`;
+                                else if (j == words[i].tiles.length - 1) border_radius = `0 ${radius}px ${radius}px 0`;
+                                else border_radius = "0";
+                            }
+                        }
+                        cloneElement(tile, delay, words[i].valid ? "var(--light-green)" : (words[i].disconnected ? "var(--light-yellow)" : "var(--light-red)"), false, score_display, classic_score ? `${radius}px` : border_radius);
+                        delay += classic_score ? 50 : 10;
                     }
+                    delay += classic_score ? 0 : words[i].tiles.length * 30;
                 }
                 const prev_score = parseInt(score_display.innerText);
                 const inc_dir = (score > prev_score ? 1 : -1);
@@ -1423,7 +1548,7 @@
                 for (var i = 0; i < Math.abs(score - prev_score); i++) setTimeout(() => {
                     temp_score += inc_dir;
                     score_display.innerText = temp_score;
-                }, delay + 1000 + i*10);
+                }, delay + 500 + i*10);
                 setTimeout(() => {
                     if (!display) {
                         unlockTiles();
@@ -1437,25 +1562,23 @@
                         else {
                             if (all_valid) {
                                 if (my_type == "classic") {
-                                    if (deck.length >= 2) {
-                                        setTimer(auto_draw_delay, classic_timer_callback);
-                                        createTileRow(ndraw(deck, 2));
-                                    }
+                                    createTileRow(ndraw(deck, 2));
+                                    if (deck.length >= 2) setTimer(auto_draw_delay, classic_timer_callback);
                                     else startFinalRound();
                                 }
                                 else assignDraws(2);
                             }
-                            else if (my_type == "classic" && !classic_timed) if (deck.length >= 2) {
-                                setTimer(auto_draw_delay, classic_timer_callback);
+                            else if (my_type == "classic" && !classic_timed) {
                                 createTileRow(ndraw(deck, 2));
+                                if (deck.length >= 2) setTimer(auto_draw_delay, classic_timer_callback);
+                                else startFinalRound();
                             }
-                            else startFinalRound();
                             else triggerAlert("not perfect yet!");
                         }
                     }
                     else document.querySelector(".review-next").classList.add("active");
                     score_allowed = true;
-                }, delay + 600);
+                }, delay + (classic_score ? 1000 : 900));
             }
         }
 
@@ -1463,7 +1586,7 @@
         var deck = full_deck;
 
         function createInitialDeck(mem_count) {
-            const draws_per_game = 8;
+            const draws_per_game = 12;
             const tiles_per_player = 7 + 2*draws_per_game;
             const tiles_total = tiles_per_player*mem_count;
             var full_decks_count = Math.floor(tiles_total / full_deck.length);
@@ -1553,9 +1676,34 @@
         }
 
         function reviewNext() {
-            const current_blob = t_blobs[++blob_i % t_blobs.length];
+            if (++blob_i == t_blobs.length - 1) {
+                setTimeout(() => {
+                    document.querySelector(".review-next").src = "exit.png";
+                    document.querySelector(".review-next").onclick = redirect;
+                    document.querySelector(".review-next").classList.add("classic");
+                    document.querySelector(".review-next").classList.add("active");
+                }, 300);
+            }
+            const current_blob = t_blobs[blob_i % t_blobs.length];
             displayBoard(current_blob);
             document.querySelector(".review-next").classList.remove("active");
+        }
+
+        function onClassicWin() {
+            lockTiles();
+            triggerProgressMessage("game-over-msg");
+            game_over = true;
+            document.querySelector(".submit-btn").classList.add("hidden");
+            document.querySelector(".review-next").src = "exit.png";
+            document.querySelector(".review-next").onclick = redirect;
+            document.querySelector(".review-next").classList.add("classic");
+            document.querySelector(".review-next").classList.add("active");
+            end_time = new Date() - start_date;
+            if (classic_timed) document.getElementById("timer").classList.add("hidden");
+        }
+
+        function redirect() {
+
         }
 
         function startFinalRound() {
@@ -1697,21 +1845,24 @@
         }
 
         const classic_timed = false;
+        const classic_score = false;
         const start_date = new Date();
+        var end_time = 0;
         const classic_timer_callback = () => {
             createTileRow(ndraw(deck, 2));
             triggerAlert("given a helping hand!");
         }
         if (my_type == "classic") {
             createInitialDeck(1);
-            const initial_draw = ndraw(deck, 7).join("").replaceAll("Q", "A").replaceAll("Z", "D").replaceAll("X", "B").replaceAll("Y", "I").replaceAll("J", "T").split("");
+            const initial_draw = ndraw(deck, 7).join("").replaceAll("Q", "A").split("");
             setTimeout(() => createTileRow(initial_draw), 500);
-            setTimer(auto_draw_delay, classic_timer_callback);
+            if (!classic_timed) setTimer(auto_draw_delay, classic_timer_callback);
         }
 
         setInterval(() => {
             var total_seconds = (auto_draw_delay - (new Date() - draw_start_date))/1000;
             if (my_type == "classic" && !classic_timed) var total_seconds = (new Date() - start_date) / 1000;
+            if (my_type == "classic" && !classic_timed && game_over) var total_seconds = end_time / 1000
             const mins = Math.max(0, Math.floor(total_seconds / 60));
             const secs = Math.max(0, Math.floor(total_seconds % 60));
             const text = mins + ":" + (secs < 10 ? "0" : "") + secs;
