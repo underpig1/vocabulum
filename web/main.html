@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="icon" type="image/png" href="img/favicon.png" />
     <title>Vocabulum</title>
     <style>
         :root {
@@ -392,8 +393,8 @@
         #recenter-btn {
             position: absolute;
             top: 35px;
-            right: 50px;
-            width: 30px;
+            right: 150px;
+            height: 25px;
             cursor: pointer;
             opacity: 0;
             transform: scale(0.8);
@@ -405,6 +406,21 @@
             transform: scale(1);
             opacity: 1;
             pointer-events: all;
+        }
+
+        .zoom-btn {
+            position: absolute;
+            top: 35px;
+            height: 25px;
+            cursor: pointer;
+        }
+
+        .zoom-btn.zoom-out {
+            right: 50px;
+        }
+
+        .zoom-btn.zoom-in {
+            right: 100px;
         }
 
         .progress-msg {
@@ -593,8 +609,20 @@
             }
 
             #recenter-btn {
-                right: 25px;
+                right: 125px;
                 top: 30px;
+            }
+
+            .zoom-btn {
+                top: 30px;
+            }
+
+            .zoom-btn.zoom-out {
+                right: 25px;
+            }
+
+            .zoom-btn.zoom-in {
+                right: 75px;
             }
 
             .board-header {
@@ -645,9 +673,24 @@
             }
         }
 
-        @media only screen and (max-width: 400px) {
+        @media only screen and (max-width: 600px) {
+            #recenter-btn {
+                left: 25px;
+            }
+        }
+
+        @media only screen and (max-width: 450px) {
             .submit-btn {
                 width: calc(100% - 200px);
+            }
+
+            #recenter-btn {
+                left: unset;
+                right: 25px;
+            }
+
+            .zoom-btn {
+                display: none;
             }
         }
     </style>
@@ -663,6 +706,8 @@
     <!-- <h1 class="ui score">0</h1> -->
     <div class="notify-msg"><div></div><img src="img/alert.png" style="height: 20px;"></img><span>SeaMonkey21 just forced a draw!</span></div>
     <button class="submit-btn control" onclick="tryDraw(this)"><img src="img/submit.png" style="height: 12px;"></img><span>draw</span></button>
+    <img class="zoom-btn zoom-in" src="img/magnify-out.png" onclick="zoom(false)"></img>
+    <img class="zoom-btn zoom-out" src="img/magnify-in.png" onclick="zoom(true)"></img>
     <img id="recenter-btn" src="img/recenter.png" onclick="recenterTiles()"></img>
     <h1 id="score" class="control">0</h1>
     <h1 id="timer" class="control"></h1>
@@ -755,7 +800,24 @@
         //     el.addEventListener("click", (e) => triggerAlert("touch"));
         // });
 
+        var zooming = false;
+        var touch_starts = [[0, 0], [0, 0]];
+        var initial_tile_size = JSON.parse(JSON.stringify(tile_size));
+        var touches = 0;
         document.ontouchstart = (e) => {
+            touches = e.touches.length
+            if (score_allowed && e.touches.length > 1) {
+                zooming = true;
+                document.ontouchend(e, e.touches[0]);
+                const center = (tpos) => [(tpos[0][0] + tpos[1][0])/2, (tpos[0][1] + tpos[1][1])/2];
+                touch_starts[0] = [e.touches[0].pageX, e.touches[0].pageY];
+                touch_starts[1] = [e.touches[1].pageX, e.touches[1].pageY];
+                initial_tile_size = JSON.parse(JSON.stringify(tile_size));
+                mouse_initial_position = center(touch_starts);
+                grid_initial_position = JSON.parse(JSON.stringify(grid_pos));
+                return;
+            }
+            if (touches > 1) return;
             const touch = e.touches[0];
             if (touch) {
                 var override = false;
@@ -785,8 +847,12 @@
                 }
             }
         }
-        document.ontouchend = (e) => {
-            const touch = e.changedTouches[0];
+        document.ontouchend = (e, t) => {
+            if (zooming && e.changedTouches.length > 1) {
+                normalizeTileSize();
+            }
+            var touch = e.changedTouches[0];
+            if (t) touch = t
             if (touch.target.getAttribute("id") == "background" || touch.target.classList.contains("tile")) {
                 e.preventDefault();
             }
@@ -815,6 +881,23 @@
             tile_is_contested = false;
         }
         document.ontouchmove = (e) => {
+            if (e.touches.length > 1 && zooming && score_allowed) {
+                const dist = (tpos) => Math.sqrt((tpos[0][0] - tpos[1][0])**2 + (tpos[0][1] - tpos[1][1])**2);
+                const center = (tpos) => [(tpos[0][0] + tpos[1][0])/2, (tpos[0][1] + tpos[1][1])/2];
+                var touch_now = [0, 0];
+                touch_now[0] = [e.touches[0].pageX, e.touches[0].pageY];
+                touch_now[1] = [e.touches[1].pageX, e.touches[1].pageY];
+                var zoom_fac = dist(touch_now)/dist(touch_starts);
+                const size = Math.min(Math.max(20, zoom_fac*initial_tile_size), 100);
+                zoom_fac = size/initial_tile_size;
+                const initial_touch_center = center(touch_starts);
+                const touch_center = center(touch_now);
+                const offset = dist([touch_center, anchor_pos]);
+                setGridPos(grid_initial_position.map((c, i) => c + (initial_touch_center[i] - c)*(1 - zoom_fac) + touch_center[i] - initial_touch_center[i]));
+                setTileSize(size);
+                return;
+            }
+
             const touch = e.touches[0];
             if (target && touch && !tiles_locked) {
                 var tid = target.getAttribute("tid");
@@ -990,6 +1073,22 @@
                 var tid = target.getAttribute("tid");
                 tiles[tid].position = snapToGrid(tiles[tid].position);
             }
+        }
+
+        function setTileSize(size) {
+            const initial_tile_size = tile_size;
+            tile_size = Math.round(size*2)/2;
+            document.documentElement.style.setProperty("--tile-size", size + "px");
+            for (const [tid, tile] of Object.entries(tiles)) {
+                const position = tile.position.map((x) => x/initial_tile_size*tile_size);
+                tileTwerp(tile.element, position, 0);
+                tile.position = position;
+            }
+            determineBorderRadii();
+        }
+
+        function normalizeTileSize() {
+            setTileSize(Math.round(tile_size));
         }
 
         function unlockTiles() {
@@ -1197,6 +1296,7 @@
                 var radius = tile_size / 5;
                 var vert = [false, false];
                 var horiz = [false, false];
+                const in_vicinity = (a, b, l) => a >= b - l && a <= b + l;
                 for (var stile of Object.values(tiles)) {
                     if (stile.tid != tile.tid) {
                         if (stile.position[1] == tile.position[1]) {
@@ -1513,6 +1613,31 @@
             msg.classList.add("active");
             setTimeout(() => msg.classList.remove("active"), delay);
         }
+        
+        const zoom_obj = {
+            size: JSON.parse(JSON.stringify(tile_size)),
+            min: 20,
+            max: 100
+        }
+
+        function zoom(dir = true) {
+            zoom_obj.size = JSON.parse(JSON.stringify(tile_size));
+            const inc = tile_size/3;
+            const target_size = Math.max(zoom_obj.min, Math.min(tile_size + inc*(dir ? 1 : -1), zoom_obj.max));
+            const initial_grid_position = grid_pos;
+            const zoom_fac = target_size/tile_size;
+            // c + (initial_touch_center[i] - c)*(1 - zoom_fac) + touch_center[i] - initial_touch_center[i])
+            const target_pos = initial_grid_position.map((c, i) => c + (anchor_pos[i] - c)*(1-zoom_fac) + anchor_pos[i] - anchor_pos[i]);
+            gsap.to(zoom_obj, {
+                duration: 0.3,
+                size: target_size,
+                ease: "power4.out",
+                onUpdate: () => {
+                    setTileSize(zoom_obj.size);
+                }
+            });
+            setGridPos(target_pos, 0.3, "power4.out");
+        }
 
         function triggerBoardHeader(name, trophy = false) {
             const board_header = document.querySelector(".board-header");
@@ -1620,14 +1745,18 @@
                             if (all_valid) {
                                 if (my_type == "classic") {
                                     createTileRow(ndraw(deck, 2));
-                                    if (deck.length >= 2) setTimer(auto_draw_delay, classic_timer_callback);
+                                    if (deck.length >= 2) {
+                                        if (classic_timed) setTimer(auto_draw_delay, classic_timer_callback);
+                                    }
                                     else startFinalRound();
                                 }
                                 else assignDraws(2);
                             }
                             else if (my_type == "classic" && !classic_timed) {
                                 createTileRow(ndraw(deck, 2));
-                                if (deck.length >= 2) setTimer(auto_draw_delay, classic_timer_callback);
+                                if (deck.length >= 2) {
+                                    if (classic_timed) setTimer(auto_draw_delay, classic_timer_callback);
+                                }
                                 else startFinalRound();
                             }
                             else triggerAlert("all words must be valid before drawing!");

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinch Zoom and Pan</title>
+    <style>
+        :root {
+            touch-action: none;
+            /* Enable gestures */
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        div {
+            width: 100%;
+            height: 100%;
+        }
+
+        #myImage {
+            display: block;
+            margin: auto;
+            transform-origin: center center;
+            touch-action: none;
+            /* Disable default gestures */
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <img id="myImage" src="web/img/single_trophy.png" alt="Zoomable Image">
+
+    <script>
+        function createPinchZoom(element, options = {}) {
+                const state = {
+                    zoomFactor: 1,
+                    offset: { x: 0, y: 0 },
+                    lastDragPosition: null,
+                    isDoubleTap: false
+                };
+
+                const settings = {
+                    maxZoom: options.maxZoom || 4,
+                    minZoom: options.minZoom || 0.5,
+                    lockDragAxis: options.lockDragAxis || false,
+                    use2d: options.use2d || true
+                };
+
+                // Setup container
+                const container = document.createElement('div');
+                container.className = 'pinch-zoom-container';
+                container.style.position = 'relative';
+
+                element.parentNode.insertBefore(container, element);
+                container.appendChild(element);
+
+                element.style.transformOrigin = '0% 0%';
+                element.style.position = 'absolute';
+                element.style.backfaceVisibility = 'hidden';
+                element.style.willChange = 'transform';
+
+                // Helper functions
+                function getDistance(a, b) {
+                    const x = a.x - b.x;
+                    const y = a.y - b.y;
+                    return Math.sqrt(x * x + y * y);
+                }
+
+                function getTouchPositions(event) {
+                    const rect = container.getBoundingClientRect();
+                    return Array.from(event.touches).map(touch => ({
+                        x: touch.pageX - rect.left,
+                        y: touch.pageY - rect.top
+                    }));
+                }
+
+                function calculateScale(startTouches, endTouches) {
+                    const startDistance = getDistance(startTouches[0], startTouches[1]);
+                    const endDistance = getDistance(endTouches[0], endTouches[1]);
+                    return endDistance / startDistance;
+                }
+
+                function getInitialZoomFactor() {
+                    return Math.min(
+                        container.offsetWidth / element.offsetWidth,
+                        container.offsetHeight / element.offsetHeight
+                    );
+                }
+
+                function updateTransform() {
+                    const zoomFactor = getInitialZoomFactor() * state.zoomFactor;
+                    const transform = `scale(${zoomFactor}) translate(${-state.offset.x / zoomFactor}px, ${-state.offset.y / zoomFactor}px)`;
+
+                    element.style.transform = settings.use2d
+                        ? transform
+                        : transform.replace('scale', 'scale3d') + ' translateZ(0)';
+                }
+
+                function handleZoom(scale) {
+                    state.zoomFactor *= scale;
+                    state.zoomFactor = Math.min(settings.maxZoom, Math.max(state.zoomFactor, settings.minZoom));
+
+                    const center = {
+                        x: container.offsetWidth / 2,
+                        y: container.offsetHeight / 2
+                    };
+
+                    state.offset = {
+                        x: state.offset.x + (scale - 1) * (center.x + state.offset.x),
+                        y: state.offset.y + (scale - 1) * (center.y + state.offset.y)
+                    };
+
+                    updateTransform();
+                }
+
+                function handleDrag(touch) {
+                    const position = {
+                        x: touch.pageX - container.getBoundingClientRect().left,
+                        y: touch.pageY - container.getBoundingClientRect().top
+                    };
+
+                    if (state.lastDragPosition) {
+                        let deltaX = position.x - state.lastDragPosition.x;
+                        let deltaY = position.y - state.lastDragPosition.y;
+
+                        if (settings.lockDragAxis) {
+                            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                                deltaY = 0;
+                            } else {
+                                deltaX = 0;
+                            }
+                        }
+
+                        state.offset.x -= deltaX;
+                        state.offset.y -= deltaY;
+                        updateTransform();
+                    }
+
+                    state.lastDragPosition = position;
+                }
+
+                // Event handlers
+                let interaction = null;
+                let startTouches = null;
+
+                function handleTouchStart(e) {
+                    if (e.touches.length === 2) {
+                        interaction = 'zoom';
+                        startTouches = getTouchPositions(e);
+                    } else if (e.touches.length === 1 && state.zoomFactor > 1) {
+                        interaction = 'drag';
+                        state.lastDragPosition = null;
+                    }
+                }
+
+                function handleTouchMove(e) {
+                    e.preventDefault();
+
+                    if (!interaction) return;
+
+                    if (interaction === 'zoom' && e.touches.length === 2) {
+                        const currentTouches = getTouchPositions(e);
+                        const scale = calculateScale(startTouches, currentTouches);
+                        handleZoom(scale);
+                        startTouches = currentTouches;
+                    } else if (interaction === 'drag' && e.touches.length === 1) {
+                        handleDrag(e.touches[0]);
+                    }
+                }
+
+                function handleTouchEnd() {
+                    interaction = null;
+                    startTouches = null;
+                    state.lastDragPosition = null;
+                }
+
+                // Add event listeners
+                container.addEventListener('touchstart', handleTouchStart, { passive: false });
+                container.addEventListener('touchmove', handleTouchMove, { passive: false });
+                container.addEventListener('touchend', handleTouchEnd);
+                window.addEventListener('resize', updateTransform);
+
+                // Initial setup
+                updateTransform();
+
+                // Public methods
+                return {
+                    zoomIn: () => handleZoom(1.5),
+                    zoomOut: () => handleZoom(0.667),
+                    reset: () => {
+                        state.zoomFactor = 1;
+                        state.offset = { x: 0, y: 0 };
+                        updateTransform();
+                    },
+                    destroy: () => {
+                        container.removeEventListener('touchstart', handleTouchStart);
+                        container.removeEventListener('touchmove', handleTouchMove);
+                        container.removeEventListener('touchend', handleTouchEnd);
+                        window.removeEventListener('resize', updateTransform);
+                        element.style = '';
+                        container.parentNode.insertBefore(element, container);
+                        container.remove();
+                    }
+                };
+            }
+
+        const img = document.getElementById('myImage');
+        const pinchZoom = createPinchZoom(img, {
+            maxZoom: 10, // Maximum zoom level
+            minZoom: 0.5 // Minimum zoom level
+        });
+
+    </script>
+</body>
+
+</html>
