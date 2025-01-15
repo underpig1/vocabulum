@@ -11,7 +11,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="img/favicon.png" />
+    <link rel="icon" type="image/png" href="img/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="img/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="img/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Vocabulum" />
+    <link rel="manifest" href="img/favicon/site.webmanifest" />
     <title>Vocabulum</title>
     <style>
         :root {
@@ -1660,10 +1665,11 @@
             const waiting = document.querySelector(`.${type}-modal .waiting-msg`);
             const mem_count = members ? Object.keys(members).length : 0;
             document.querySelector(`.${type}-modal .member-count`).innerText = `${mem_count} member${mem_count == 1 ? "" : "s"}`;
-            if (mem_count == 0) type == "host" ? waiting.classList.add("active") : null;
-            else {
-                if (type == "host") waiting.classList.remove("active");
+            if (type == "host" && mem_count <= 1) waiting.classList.add("active");
+            else waiting.classList.remove("active");
+            if (mem_count > 0) {
                 for (var member of Object.keys(members)) {
+                    if (type == "host" && member == 0) continue;
                     const el = document.createElement("div");
                     el.classList.add("member");
                     const name = document.createElement("p");
@@ -2025,6 +2031,7 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
     <script>
         const config = {
             apiKey: "AIzaSyCYiF56kcc8XriibM-KGFcGfhfYYtvyQ1s",
@@ -2037,6 +2044,9 @@
         }
         const app = firebase.initializeApp(config);
         const database = firebase.database();
+        const appCheck = firebase.appCheck();
+        appCheck.activate("6Ld--LcqAAAAALem1ruPO8xS3k5aH4_F2rl6-ONH", true);
+
 
         const expiry_time = 24*60*60*1000; // time before a lobby is permanently deleted
         const shadow_expiry_time = 10*60*1000; // time before a lobby becomes unseen in matchmaking, to avoid inactive lobbies
