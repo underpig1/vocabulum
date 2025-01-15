@@ -1808,7 +1808,7 @@
 
         function restoreTilesFromBlob(blob) {
             for (const blob_tile of blob) {
-                const position = [blob_tile.position.x, blob_tile.position.y];
+                const position = [blob_tile.position.x*tile_size, blob_tile.position.y*tile_size];
                 const letter = blob_tile.letter;
                 createTile(letter, alphamap[letter].value, position);
             }
@@ -1821,8 +1821,8 @@
                 const tile = tiles[key];
                 blob.push({
                     position: {
-                        x: tiles[key].position[0],
-                        y: tiles[key].position[1]
+                        x: tiles[key].position[0]/tile_size,
+                        y: tiles[key].position[1]/tile_size
                     },
                     letter: tiles[key].letter
                 });
