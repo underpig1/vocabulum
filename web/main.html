@@ -1569,6 +1569,7 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
     <script>
         const config = {
             apiKey: "AIzaSyCYiF56kcc8XriibM-KGFcGfhfYYtvyQ1s",
@@ -1581,6 +1582,8 @@
         }
         const app = firebase.initializeApp(config);
         const database = firebase.database();
+        const appCheck = firebase.appCheck();
+        appCheck.activate("6Ld--LcqAAAAALem1ruPO8xS3k5aH4_F2rl6-ONH", true);
         const empty_promise = () => {
             return { then: () => {} }
         };
