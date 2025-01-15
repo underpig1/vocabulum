@@ -794,7 +794,7 @@
         const alphaweightmap = [];
         Object.keys(alphamap).forEach(c => alphaweightmap.push(...new Array(alphamap[c].draws).fill(c)));
 
-        fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split("\r\n"));
+        fetch("wordlist.txt").then(response => response.text()).then((data) => dict = data.split(/[\r\n]|[\n]/));
 
         // document.querySelectorAll(".tile").forEach((el) => {
         //     el.addEventListener("click", (e) => triggerAlert("touch"));
@@ -1739,7 +1739,7 @@
                                 if (my_type == "classic") onClassicWin();
                                 else ref(my_lobby_data_path + "winner_id").set(my_id);
                             }
-                            else triggerAlert("all words must be valid before drawing!");
+                            else triggerAlert("all words must be valid!");
                         }
                         else {
                             if (all_valid) {
