@@ -62,9 +62,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="1933.0544"
-     inkscape:cy="884.83456"
+     inkscape:zoom="32"
+     inkscape:cx="1298.9022"
+     inkscape:cy="911.57012"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -97,6 +97,16 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:0.00502511;stroke:none;stroke-width:2.60928178;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect32187"
+       width="3.2011204"
+       height="3.201102"
+       x="341.87155"
+       y="54.211926"
+       inkscape:export-filename="C:\Users\chase\Downloads\f.png"
+       inkscape:export-xdpi="7934.7007"
+       inkscape:export-ydpi="7934.7007" />
     <rect
        style="opacity:1;vector-effect:none;fill:#f0c000;fill-opacity:0;stroke:none;stroke-width:1.86799991;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
        id="rect32088"
@@ -3765,44 +3775,40 @@ AAAAAAAAoEj8f2vrCRQumy+EAAAAAElFTkSuQmCC
          x="52.384827"
          id="tspan31944"
          sodipodi:role="line">EXIT &gt;</tspan></text>
-    <rect
-       ry="0.42520261"
-       y="54.653641"
-       x="342.14529"
-       height="2.6989908"
-       width="2.6990001"
-       id="rect9754-2"
-       style="opacity:1;fill:#030000;fill-opacity:1;stroke:#000000;stroke-width:0.23971371;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
-       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
-       inkscape:export-xdpi="750.26471"
-       inkscape:export-ydpi="750.26471" />
-    <rect
-       style="opacity:1;fill:#f9be74;fill-opacity:1;stroke:#000000;stroke-width:0.23971371;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
-       id="rect2277-6-2-3"
-       width="2.6990001"
-       height="2.6989908"
-       x="342.14529"
-       y="54.332779"
-       ry="0.42520261"
-       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
-       inkscape:export-xdpi="750.26471"
-       inkscape:export-ydpi="750.26471" />
-    <path
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.01963324;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       d="m 342.5703,54.513475 c -0.2678,0 -0.48541,0.217597 -0.48541,0.485406 v 1.848422 c 0,0.267808 0.21761,0.485416 0.48541,0.485416 h 1.8491 c 0.26781,0 0.48474,-0.217608 0.48474,-0.485416 v -1.848422 c 0,-0.267809 -0.21693,-0.485406 -0.48474,-0.485406 z m 0,0.120009 h 1.8491 c 0.20333,0 0.36473,0.16207 0.36473,0.365397 v 1.848422 c 0,0.203327 -0.1614,0.365402 -0.36473,0.365402 h -1.8491 c -0.20332,0 -0.36473,-0.162075 -0.36473,-0.365402 v -1.848422 c 0,-0.203327 0.16141,-0.365397 0.36473,-0.365397 z"
-       id="rect1270-4-0-7-1"
-       inkscape:connector-curvature="0"
-       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
-       inkscape:export-xdpi="750.26471"
-       inkscape:export-ydpi="750.26471" />
-    <path
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.02532963;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       d="m 344.08418,55.145707 a 0.07724385,0.07724359 0 0 0 -0.051,0.02749 l -0.70465,0.821306 -0.37613,-0.328519 a 0.07724385,0.07724359 0 1 0 -0.10191,0.115981 l 0.43446,0.380148 a 0.07724385,0.07724359 0 0 0 0.10995,-0.0081 l 0.75493,-0.88029 a 0.07724385,0.07724359 0 0 0 -0.0657,-0.128059 z"
-       id="path1268-9-2-6-7"
-       inkscape:connector-curvature="0"
-       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
-       inkscape:export-xdpi="750.26471"
-       inkscape:export-ydpi="750.26471" />
+    <g
+       id="g32181"
+       transform="translate(-0.02268255,2.3563756e-5)">
+      <rect
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.23971371;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+         id="rect32183"
+         width="2.6990001"
+         height="2.6989908"
+         x="342.14529"
+         y="54.593277"
+         ry="0.75845331"
+         inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
+         inkscape:export-xdpi="750.26471"
+         inkscape:export-ydpi="750.26471" />
+      <rect
+         inkscape:export-ydpi="750.26471"
+         inkscape:export-xdpi="750.26471"
+         inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
+         ry="0.79937893"
+         y="54.332779"
+         x="342.14529"
+         height="2.6989908"
+         width="2.6990001"
+         id="rect2277-6-2-3"
+         style="opacity:1;fill:#f9be74;fill-opacity:1;stroke:#000000;stroke-width:0.23999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal" />
+      <path
+         inkscape:export-ydpi="750.26471"
+         inkscape:export-xdpi="750.26471"
+         inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\favicon.png"
+         inkscape:connector-curvature="0"
+         id="path1268-9-2-6-7"
+         d="m 343.98469,55.233036 a 0.06420543,0.06420522 0 0 0 -0.0424,0.02285 l -0.58571,0.682673 -0.31264,-0.273067 a 0.06420543,0.06420522 0 1 0 -0.0847,0.0964 l 0.36112,0.315981 a 0.06420543,0.06420522 0 0 0 0.0914,-0.0067 l 0.62751,-0.731701 A 0.06420543,0.06420522 0 0 0 343.98465,55.233 Z"
+         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.11636863;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+    </g>
     <g
        id="g32085"
        transform="translate(-31.899647,10.668617)"
@@ -3887,5 +3893,64 @@ AAAAAAAAoEj8f2vrCRQumy+EAAAAAElFTkSuQmCC
        id="path32118"
        d="m 508.59363,24.124925 a 1.2391866,0.50080731 87.443554 0 0 -0.43692,1.278044 1.2391866,0.50080731 87.443554 0 0 0.22137,0.922475 1.2391866,0.50080731 33.291413 0 0 -0.14173,-0.09832 1.2391866,0.50080731 33.291413 0 0 -1.29935,-0.245401 1.2391866,0.50080731 33.291413 0 0 0.78007,1.102595 1.2391866,0.50080731 33.291413 0 0 1.07342,0.365481 c 0.0842,0.267091 0.17574,0.526163 0.274,0.777559 a 1.2391866,0.50080731 33.291413 0 0 -0.11541,-0.07952 1.2391866,0.50080731 33.291413 0 0 -1.29935,-0.245287 1.2391866,0.50080731 33.291413 0 0 0.78007,1.102481 1.2391866,0.50080731 33.291413 0 0 1.14509,0.351354 c 0.17502,0.337967 0.36245,0.660073 0.56098,0.966338 a 1.2391866,0.50080731 13.957858 0 0 -0.20496,-0.05731 1.2391866,0.50080731 13.957858 0 0 -1.30721,0.19869 1.2391866,0.50080731 13.957858 0 0 1.10112,0.782116 1.2391866,0.50080731 13.957858 0 0 1.08516,0.01003 c 0.2283,0.284994 0.46622,0.553848 0.71114,0.807977 a 1.2391866,0.50080731 12.455539 0 0 -0.0154,-0.0034 1.2391866,0.50080731 12.455539 0 0 -1.30162,0.232755 1.2391866,0.50080731 12.455539 0 0 1.12116,0.75295 1.2391866,0.50080731 12.455539 0 0 1.17961,-0.06767 c 0.2634,0.219569 0.53097,0.425566 0.80103,0.61749 a 1.2391866,0.50080731 0.652572 0 0 -0.10504,-0.0026 1.2391866,0.50080731 0.652572 0 0 -1.22655,0.494219 1.2391866,0.50080731 0.652572 0 0 1.2515,0.507663 1.2391866,0.50080731 0.652572 0 0 1.14657,-0.312732 c 0.17948,0.104589 0.35848,0.203718 0.5366,0.297922 a 1.2391866,0.50080731 0.652572 0 0 -1.02023,0.487725 1.2391866,0.50080731 0.652572 0 0 1.25162,0.507664 1.2391866,0.50080731 0.652572 0 0 1.16912,-0.340759 c 0.2364,0.0969 0.46639,0.184374 0.68996,0.264655 a 0.50080731,1.2391866 77.441365 0 0 -0.90801,0.715695 0.50080731,1.2391866 77.441365 0 0 1.33455,0.208147 0.50080731,1.2391866 77.441365 0 0 0.98434,-0.485561 c 0.97613,0.256737 1.6139,0.329593 1.6139,0.329593 a 0.27021171,0.27021171 0 1 0 0.06,-0.536828 c 0,0 -0.25966,-0.02942 -0.69393,-0.115637 a 1.2391866,0.50080731 59.686817 0 0 -0.33711,-0.995503 1.2391866,0.50080731 59.686817 0 0 -1.05486,-0.797496 1.2391866,0.50080731 59.686817 0 0 0.2086,1.334439 1.2391866,0.50080731 59.686817 0 0 0.1366,0.209741 c -0.28891,-0.07934 -0.60511,-0.175699 -0.94048,-0.29006 a 1.2391866,0.50080731 59.686817 0 0 -0.33449,-0.94697 1.2391866,0.50080731 59.686817 0 0 -1.05486,-0.797382 1.2391866,0.50080731 59.686817 0 0 0.17465,1.275082 c -0.16822,-0.07321 -0.33885,-0.151178 -0.51108,-0.23378 a 1.2391866,0.50080731 59.686817 0 0 -0.33643,-1.014301 1.2391866,0.50080731 59.686817 0 0 -1.05486,-0.797497 1.2391866,0.50080731 59.686817 0 0 0.0845,1.101342 c -0.21743,-0.133551 -0.43477,-0.276034 -0.65087,-0.426773 a 1.2391866,0.50080731 75.030502 0 0 -0.074,-0.993111 1.2391866,0.50080731 75.030502 0 0 -0.80628,-1.048024 1.2391866,0.50080731 75.030502 0 0 -0.18399,1.210713 c -0.22239,-0.193964 -0.44088,-0.398694 -0.65395,-0.615325 a 1.2391866,0.50080731 84.839572 0 0 0.12133,-1.051214 1.2391866,0.50080731 84.839572 0 0 -0.61589,-1.170154 1.2391866,0.50080731 84.839572 0 0 -0.38507,1.213447 c -0.18535,-0.239758 -0.3639,-0.490588 -0.53398,-0.753634 a 0.50080731,1.2391866 10.319831 0 0 0.43645,-1.022504 0.50080731,1.2391866 10.319831 0 0 -0.28117,-1.292171 0.50080731,1.2391866 10.319831 0 0 -0.71068,1.148622 0.50080731,1.2391866 10.319831 0 0 -0.023,0.157107 c -0.14626,-0.289187 -0.28273,-0.590625 -0.40831,-0.904816 a 0.50080731,1.2391866 16.151349 0 0 0.61828,-1.029112 0.50080731,1.2391866 16.151349 0 0 -0.14844,-1.313932 0.50080731,1.2391866 16.151349 0 0 -0.82359,1.070354 0.50080731,1.2391866 16.151349 0 0 -0.0346,0.134093 c -0.0529,-0.184998 -0.10335,-0.372559 -0.14891,-0.565311 a 0.27021171,0.27021171 0 0 0 -0.0489,-0.104586 1.2391866,0.50080731 87.443554 0 0 0.14081,-0.984906 1.2391866,0.50080731 87.443554 0 0 -0.56201,-1.196928 z m 23.6126,0 a 0.50080731,1.2391866 2.556446 0 0 -0.56212,1.196928 0.50080731,1.2391866 2.556446 0 0 0.14082,0.984907 0.27021171,0.27021171 0 0 0 -0.0489,0.104585 c -0.0456,0.192752 -0.096,0.380313 -0.1489,0.565311 a 1.2391866,0.50080731 73.848651 0 0 -0.0345,-0.134093 1.2391866,0.50080731 73.848651 0 0 -0.8237,-1.070354 1.2391866,0.50080731 73.848651 0 0 -0.14845,1.313932 1.2391866,0.50080731 73.848651 0 0 0.6184,1.029112 c -0.12559,0.314191 -0.26217,0.615629 -0.40843,0.904816 a 1.2391866,0.50080731 79.680169 0 0 -0.0229,-0.157107 1.2391866,0.50080731 79.680169 0 0 -0.71068,-1.148622 1.2391866,0.50080731 79.680169 0 0 -0.28118,1.292172 1.2391866,0.50080731 79.680169 0 0 0.43646,1.022503 c -0.17008,0.263046 -0.34864,0.513876 -0.53398,0.753634 a 0.50080731,1.2391866 5.160428 0 0 -0.38519,-1.213447 0.50080731,1.2391866 5.160428 0 0 -0.61589,1.170154 0.50080731,1.2391866 5.160428 0 0 0.12144,1.051214 c -0.21307,0.216631 -0.43156,0.421361 -0.65395,0.615325 a 0.50080731,1.2391866 14.969498 0 0 -0.1841,-1.210713 0.50080731,1.2391866 14.969498 0 0 -0.80627,1.048024 0.50080731,1.2391866 14.969498 0 0 -0.0739,0.993111 c -0.2161,0.15074 -0.43345,0.293222 -0.65087,0.426773 a 0.50080731,1.2391866 30.313183 0 0 0.0844,-1.101342 0.50080731,1.2391866 30.313183 0 0 -1.05475,0.797497 0.50080731,1.2391866 30.313183 0 0 -0.33654,1.014301 c -0.17223,0.0826 -0.34274,0.160571 -0.51097,0.23378 a 0.50080731,1.2391866 30.313183 0 0 0.17466,-1.275082 0.50080731,1.2391866 30.313183 0 0 -1.05486,0.797382 0.50080731,1.2391866 30.313183 0 0 -0.33461,0.94697 c -0.33536,0.114361 -0.65146,0.21072 -0.94037,0.29006 a 0.50080731,1.2391866 30.313183 0 0 0.1366,-0.209741 0.50080731,1.2391866 30.313183 0 0 0.20861,-1.334439 0.50080731,1.2391866 30.313183 0 0 -1.05486,0.797496 0.50080731,1.2391866 30.313183 0 0 -0.33712,0.995503 c -0.43426,0.08621 -0.69393,0.115637 -0.69393,0.115637 a 0.27021171,0.27021171 0 1 0 0.0599,0.536828 c 0,0 0.63777,-0.07286 1.6139,-0.329593 a 1.2391866,0.50080731 12.558635 0 0 0.98445,0.485561 1.2391866,0.50080731 12.558635 0 0 1.33455,-0.208146 1.2391866,0.50080731 12.558635 0 0 -0.908,-0.715696 c 0.22356,-0.08028 0.45356,-0.167756 0.68994,-0.264655 a 0.50080731,1.2391866 89.347428 0 0 1.16902,0.340759 0.50080731,1.2391866 89.347428 0 0 1.25162,-0.507664 0.50080731,1.2391866 89.347428 0 0 -1.02023,-0.487725 c 0.17812,-0.0942 0.35723,-0.193333 0.53671,-0.297922 a 0.50080731,1.2391866 89.347428 0 0 1.14646,0.312732 0.50080731,1.2391866 89.347428 0 0 1.2515,-0.507663 0.50080731,1.2391866 89.347428 0 0 -1.22644,-0.494219 0.50080731,1.2391866 89.347428 0 0 -0.10515,0.0026 c 0.27006,-0.191924 0.53775,-0.397921 0.80114,-0.617489 a 0.50080731,1.2391866 77.544461 0 0 1.1795,0.06767 0.50080731,1.2391866 77.544461 0 0 1.12128,-0.75295 0.50080731,1.2391866 77.544461 0 0 -1.30174,-0.232755 0.50080731,1.2391866 77.544461 0 0 -0.0153,0.0034 c 0.24492,-0.254129 0.48273,-0.522982 0.71102,-0.807977 a 0.50080731,1.2391866 76.042142 0 0 1.08528,-0.01002 0.50080731,1.2391866 76.042142 0 0 1.10112,-0.782115 0.50080731,1.2391866 76.042142 0 0 -1.30721,-0.198691 0.50080731,1.2391866 76.042142 0 0 -0.20496,0.05731 c 0.19853,-0.306265 0.38585,-0.628371 0.56087,-0.966337 a 0.50080731,1.2391866 56.708587 0 0 1.14509,-0.351354 0.50080731,1.2391866 56.708587 0 0 0.78018,-1.102482 0.50080731,1.2391866 56.708587 0 0 -1.29946,0.245287 0.50080731,1.2391866 56.708587 0 0 -0.11541,0.07952 c 0.0983,-0.251396 0.18987,-0.510468 0.27411,-0.777558 a 0.50080731,1.2391866 56.708587 0 0 1.07342,-0.365482 0.50080731,1.2391866 56.708587 0 0 0.78007,-1.102595 0.50080731,1.2391866 56.708587 0 0 -1.29935,0.245401 0.50080731,1.2391866 56.708587 0 0 -0.14184,0.09832 0.50080731,1.2391866 2.556446 0 0 0.22137,-0.922475 0.50080731,1.2391866 2.556446 0 0 -0.43681,-1.278043 z"
        style="opacity:1;vector-effect:none;fill:#f0c000;fill-opacity:1;stroke:#000000;stroke-width:1.86800003;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -49.689537,49.167961 4.860435,4.860435"
+       id="path32155"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-out.png"
+       inkscape:export-xdpi="58.082375"
+       inkscape:export-ydpi="58.082375" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -47.347129,42.318294 a 8.5681768,8.5681768 0 0 1 -8.568177,8.568177 8.5681768,8.5681768 0 0 1 -8.568179,-8.568177 8.5681768,8.5681768 0 0 1 8.568179,-8.568177 8.5681768,8.5681768 0 0 1 8.568177,8.568177 z"
+       id="path32134"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-out.png"
+       inkscape:export-xdpi="58.082375"
+       inkscape:export-ydpi="58.082375" />
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path31461-2"
+       d="m -52.547707,42.318294 h -6.7352"
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-out.png"
+       inkscape:export-xdpi="58.082375"
+       inkscape:export-ydpi="58.082375" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path32167"
+       d="m -14.896828,49.167961 4.860435,4.860435"
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-in.png"
+       inkscape:export-xdpi="58.08239"
+       inkscape:export-ydpi="58.08239" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path32169"
+       d="m -12.55442,42.318294 a 8.5681768,8.5681768 0 0 1 -8.568177,8.568177 8.5681768,8.5681768 0 0 1 -8.568179,-8.568177 8.5681768,8.5681768 0 0 1 8.568179,-8.568177 8.5681768,8.5681768 0 0 1 8.568177,8.568177 z"
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-in.png"
+       inkscape:export-xdpi="58.08239"
+       inkscape:export-ydpi="58.08239" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -17.754998,42.318294 h -6.7352"
+       id="path32171"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-in.png"
+       inkscape:export-xdpi="58.08239"
+       inkscape:export-ydpi="58.08239" />
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path32173"
+       d="m -21.122606,45.685886 v -6.7352"
+       style="fill:none;stroke:#000000;stroke-width:2.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-filename="C:\Users\chase\Desktop\Projects\vocabulum\web\img\magnify-in.png"
+       inkscape:export-xdpi="58.08239"
+       inkscape:export-ydpi="58.08239" />
   </g>
 </svg>

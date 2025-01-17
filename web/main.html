@@ -1919,7 +1919,7 @@
             ref(my_lobby_path + "initial_drawn").set(false);
             ref(my_lobby_path + "start").set(false);
             ref(my_lobby_path + "winner_id").set(null);
-            window.location.href = "index.html";
+            window.location.replace("index.html");
         }
 
         function startFinalRound() {
@@ -2081,12 +2081,14 @@
 
         setInterval(() => {
             var total_seconds = (auto_draw_delay - (new Date() - draw_start_date))/1000;
-            if (my_type == "classic" && !classic_timed) var total_seconds = (new Date() - start_date) / 1000;
-            if (my_type == "classic" && !classic_timed && game_over) var total_seconds = end_time / 1000
-            const mins = Math.max(0, Math.floor(total_seconds / 60));
-            const secs = Math.max(0, Math.floor(total_seconds % 60));
-            const text = mins + ":" + (secs < 10 ? "0" : "") + secs;
-            document.getElementById("timer").innerHTML = text.split("").map((l) => `<span>${l}</span>`).join("");
+            if (my_type == "classic" && !classic_timed) total_seconds = (new Date() - start_date) / 1000;
+            if (my_type == "classic" && !classic_timed && game_over) total_seconds = end_time / 1000;
+            if (total_seconds) {
+                const mins = Math.max(0, Math.floor(total_seconds / 60));
+                const secs = Math.max(0, Math.floor(total_seconds % 60));
+                const text = mins + ":" + (secs < 10 ? "0" : "") + secs;
+                document.getElementById("timer").innerHTML = text.split("").map((l) => `<span>${l}</span>`).join("");
+            }
         }, 100);
     </script>
     <script>
