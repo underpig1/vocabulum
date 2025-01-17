@@ -1381,6 +1381,8 @@
         const set_canvas_size = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            canvas.style.width = canvas.width + "px";
+            canvas.style.height = canvas.height + "px";
         }
 
         window.addEventListener("resize", set_canvas_size);
@@ -1394,14 +1396,15 @@
         });
 
         function startOverlayAnimation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             var rects = [];
-            const max_time = 2000;
-            const max_delay = 500;
-            const rect_count = 100;
-            const size_range = [50, 500];
-            const delay_range = [0, 100];
-            const min_speed = 0.8;
-            const max_speed = 3;
+            // const max_time = 2000;
+            // const max_delay = 500;
+            const rect_count = canvas.width/10;
+            const size_range = [50, canvas.width/3];
+            const delay_range = [0, canvas.height/2];
+            const min_speed = canvas.height/700/2;
+            const max_speed = canvas.height/200/2;
             for (var i = 0; i < rect_count; i++) {
                 const delay = rrange(...slicel(...delay_range, 40, i / rect_count));
                 setTimeout(((i) => {
@@ -1418,8 +1421,8 @@
             }
 
             var prev_t = 0;
-            var full_pos = -700;
-            const full_spd = 2;
+            var full_pos = -canvas.height/2;
+            const full_spd = canvas.height/300/2;
             function drawOverlay() {
                 const dt = prev_t == 0 ? 0 : performance.now() - prev_t;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
